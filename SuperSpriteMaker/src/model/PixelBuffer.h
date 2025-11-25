@@ -21,6 +21,9 @@ public:
     uint8_t* raw();
     const uint8_t* raw() const;
 
+    uint8_t* data() { return m_pixels.data(); }
+    const uint8_t* data() const { return m_pixels.data(); }
+
     int width() const { return m_width; }
     int height() const { return m_height; }
     int stride() const { return m_stride; }
