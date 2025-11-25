@@ -68,6 +68,84 @@ PixelRGBA8 PixelBuffer::getPixel(int x, int y) const {
     }
 }
 
+void PixelBuffer::fillRect(int x, int y, int w, int h, const PixelRGBA8& c)
+{
+    if (w <= 0 || h <= 0) return;
+
+    int x0 = std::max(0, x);
+    int y0 = std::max(0, y);
+    int x1 = std::min(m_width, x + w);
+    int y1 = std::min(m_height, y + h);
+
+    for (int yy = y0; yy < y1; yy++) {
+        uint8_t* row = &m_pixels[yy * m_stride];
+
+        if (m_format == PixelFormat::RGBA8) {
+            PixelRGBA8* px = reinterpret_cast<PixelRGBA8*>(row);
+            for (int xx = x0; xx < x1; xx++)
+                px[xx] = c;
+        }
+        else {
+            for (int xx = x0; xx < x1; xx++)
+                row[xx] = c.r;
+        }
+    }
+}
+
+void PixelBuffer::blitFrom(const PixelBuffer& src, int sx, int sy, int sw, int sh, int dx, int dy)
+{
+    assert(src.m_format == m_format);
+
+    if (sw <= 0 || sh <= 0) return;
+
+    int src_x0 = std::max(0, sx);
+    int src_y0 = std::max(0, sy);
+    int src_x1 = std::min(src.m_width, sx + sw);
+    int src_y1 = std::min(src.m_height, sy + sh);
+
+    int width = src_x1 - src_x0;
+    int height = src_y1 - src_y0;
+    if (width <= 0 || height <= 0) return;
+
+    int dst_x0 = std::max(0, dx);
+    int dst_y0 = std::max(0, dy);
+
+    width = std::min(width, m_width - dst_x0);
+    height = std::min(height, m_height - dst_y0);
+    if (width <= 0 || height <= 0) return;
+
+    for (int i = 0; i < height; i++) {
+        const uint8_t* src_row =
+            &src.m_pixels[(src_y0 + i) * src.m_stride + src_x0 * src.m_bpp];
+
+        uint8_t* dst_row =
+            &m_pixels[(dst_y0 + i) * m_stride + dst_x0 * m_bpp];
+
+        memcpy(dst_row, src_row, width * m_bpp);
+    }
+}
+
+void PixelBuffer::uploadToGLTexture(GLuint tex) const
+{
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    GLenum formatGL = (m_format == PixelFormat::RGBA8)
+        ? GL_RGBA
+        : GL_RED;
+
+    glTexImage2D(GL_TEXTURE_2D, 0,
+        (m_format == PixelFormat::RGBA8 ? GL_RGBA8 : GL_R8),
+        m_width, m_height,
+        0,
+        formatGL,
+        GL_UNSIGNED_BYTE,
+        m_pixels.data()
+    );
+}
+
+
 uint8_t* PixelBuffer::raw() {
     return m_pixels.data();
 }

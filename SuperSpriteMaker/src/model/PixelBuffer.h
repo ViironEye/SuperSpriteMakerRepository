@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <glad/glad.h>
 
 enum class PixelFormat {
     RGBA8,
@@ -18,13 +19,19 @@ struct PixelRGBA8 {
 
 class PixelBuffer {
 public:
-    PixelBuffer(int width, int height,
-        PixelFormat fmt = PixelFormat::RGBA8);
+    PixelBuffer(int width, int height, PixelFormat fmt = PixelFormat::RGBA8);
 
     void clear(const PixelRGBA8& color);
 
     void setPixel(int x, int y, const PixelRGBA8& color);
+
     PixelRGBA8 getPixel(int x, int y) const;
+
+    void fillRect(int x, int y, int w, int h, const PixelRGBA8& c);
+
+    void blitFrom(const PixelBuffer& src, int sx, int sy, int sw, int sh, int dx, int dy);
+
+    void uploadToGLTexture(GLuint tex) const;
 
     uint8_t* raw();
     const uint8_t* raw() const;
