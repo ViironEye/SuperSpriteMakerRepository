@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\enums\PixelFormat.h" />
+    <ClInclude Include="src\model\Cel.h" />
     <ClInclude Include="src\model\Frame.h" />
     <ClInclude Include="src\model\Layer.h" />
     <ClInclude Include="src\model\PixelBuffer.h" />
