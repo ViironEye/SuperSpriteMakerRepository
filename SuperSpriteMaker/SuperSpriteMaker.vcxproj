@@ -136,11 +136,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
+    <ClCompile Include="src\model\Frame.cpp" />
+    <ClCompile Include="src\model\Layer.cpp" />
     <ClCompile Include="src\model\PixelBuffer.cpp" />
+    <ClCompile Include="src\model\Sprite.cpp" />
     <ClCompile Include="SuperSpriteMaker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\enums\PixelFormat.h" />
+    <ClInclude Include="src\model\Frame.h" />
+    <ClInclude Include="src\model\Layer.h" />
     <ClInclude Include="src\model\PixelBuffer.h" />
+    <ClInclude Include="src\model\Sprite.h" />
+    <ClInclude Include="src\structs\PixelFormatStruct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
