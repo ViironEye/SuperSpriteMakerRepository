@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
+    <ClCompile Include="src\model\Canvas.cpp" />
     <ClCompile Include="src\model\Frame.cpp" />
     <ClCompile Include="src\model\Layer.cpp" />
     <ClCompile Include="src\model\PixelBuffer.cpp" />
@@ -143,7 +144,9 @@
     <ClCompile Include="SuperSpriteMaker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\enums\BlendMode.h" />
     <ClInclude Include="src\enums\PixelFormat.h" />
+    <ClInclude Include="src\model\Canvas.h" />
     <ClInclude Include="src\model\Cel.h" />
     <ClInclude Include="src\model\Frame.h" />
     <ClInclude Include="src\model\Layer.h" />

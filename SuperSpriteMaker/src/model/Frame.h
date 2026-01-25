@@ -21,7 +21,5 @@ public:
 
 private:
 	PixelBuffer m_pixels;
-
-	//duration in milliseconds
 	int m_duration;
 };
