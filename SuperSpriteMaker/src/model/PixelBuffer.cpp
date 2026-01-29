@@ -55,7 +55,6 @@ void PixelBuffer::setPixel(int x, int y, const PixelRGBA8& c)
     }
 }
 
-
 PixelRGBA8 PixelBuffer::getPixel(int x, int y) const 
 {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
@@ -152,7 +151,6 @@ void PixelBuffer::uploadToGLTexture(GLuint tex) const
         m_pixels.data()
     );
 }
-
 
 uint8_t* PixelBuffer::raw() 
 {

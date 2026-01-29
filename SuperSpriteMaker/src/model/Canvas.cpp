@@ -10,16 +10,14 @@ PixelBuffer Canvas::renderFrame(int frameIndex) const
 		m_sprite->format()
 	);
 
-	result.clear(0x00000000);
+	result.clear(PixelRGBA8(0, 0, 0, 0));
 
 	for (int li = 0; li < m_sprite->layerCount(); ++li) 
 	{
 		const Layer* layer = m_sprite->getLayer(li);
-
 		if (!layer || !layer->visible()) continue;
 
 		const Cel* cel = layer->getCel(frameIndex);
-
 		if (!cel) continue;
 
 		const Frame* frame = cel->frame();
@@ -35,12 +33,16 @@ PixelBuffer Canvas::renderFrame(int frameIndex) const
 				int dx = x + ox;
 				int dy = y + oy;
 
-				if (dx < 0 || dy < 0 || dx >= result.width() || dy >= result.height()) continue;
+				if (dx < 0 || dy < 0 || dx >= result.width() || dy >= result.height())
+				{
+					continue;
+				}
 
-				uint32_t srcPx = src.getPixel(x, y);
-				uint32_t& dstPx = result.pixelRef(dx, dy);
+				PixelRGBA8 srcPx = src.getPixel(x, y);
+				PixelRGBA8 dstPx = result.getPixel(dx, dy);
 
-				dstPx = blendPixel(dstPx, srcPx);
+				PixelRGBA8 out = blendPixel(dstPx, srcPx);
+				result.setPixel(dx, dy, out);
 			}
 		}
 	}
@@ -48,28 +50,20 @@ PixelBuffer Canvas::renderFrame(int frameIndex) const
 	return result;
 }
 
-
-uint32_t Canvas::blendPixel(uint32_t dst, uint32_t src)
+PixelRGBA8 Canvas::blendPixel(const PixelRGBA8& dst, const PixelRGBA8& src) 
 {
-	uint8_t sa = (src >> 24) & 0xFF;
-	if (sa == 255)
+	if (src.a == 255)
 		return src;
-	if (sa == 0)
+	if (src.a == 0)
 		return dst;
 
-	uint8_t sr = (src >> 16) & 0xFF;
-	uint8_t sg = (src >> 8) & 0xFF;
-	uint8_t sb = src & 0xFF;
+	uint8_t invA = 255 - src.a;
 
-	uint8_t da = (dst >> 24) & 0xFF;
-	uint8_t dr = (dst >> 16) & 0xFF;
-	uint8_t dg = (dst >> 8) & 0xFF;
-	uint8_t db = dst & 0xFF;
+	PixelRGBA8 out;
+	out.a = src.a + (dst.a * invA) / 255;
+	out.r = (src.r * src.a + dst.r * invA) / 255;
+	out.g = (src.g * src.a + dst.g * invA) / 255;
+	out.b = (src.b * src.a + dst.b * invA) / 255;
 
-	uint8_t outA = sa + da * (255 - sa) / 255;
-	uint8_t outR = (sr * sa + dr * (255 - sa)) / 255;
-	uint8_t outG = (sg * sa + dg * (255 - sa)) / 255;
-	uint8_t outB = (sb * sa + db * (255 - sa)) / 255;
-
-	return (outA << 24) | (outR << 16) | (outG << 8) | outB;
+	return out;
 }

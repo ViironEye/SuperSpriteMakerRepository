@@ -11,5 +11,5 @@ public:
 
 private:
 	Sprite* m_sprite = nullptr;
-	static uint32_t blendPixel(uint32_t dst, uint32_t src);
+	static PixelRGBA8 blendPixel(const PixelRGBA8& dst, const PixelRGBA8& src);
 };
