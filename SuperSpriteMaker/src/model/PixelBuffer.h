@@ -29,6 +29,10 @@ public:
     int stride() const { return m_stride; }
     PixelFormat format() const { return m_format; }
 
+    bool inBounds(int x, int y) const {
+        return x >= 0 && y >= 0 && x < m_width && y < m_height;
+    }
+
 private:
     int bytesPerPixel(PixelFormat f) const;
 

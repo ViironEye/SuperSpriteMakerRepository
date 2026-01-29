@@ -2,22 +2,22 @@
 
 class PencilTool : public Tool {
 public:
-	explicit PencilTool(const PixelRGBA8& color) : m_color(color) { }
+	explicit PencilTool(PixelRGBA8 color) : m_color(color) { m_color.a = 255; }
 
-	void setColor(const PixelRGBA8& c) { m_color = c; }
-
-	void apply(Frame* frame, int x, int y) override
+	void apply(Frame* frame, StrokeCommand* cmd, int x, int y) override
 	{
-		if (!frame) return;
-
 		PixelBuffer& buf = frame->pixels();
+		if (!buf.inBounds(x, y)) return;
 
-		if (x < 0 || y < 0 || x >= buf.width() || y >= buf.height())
-		{
+		PixelRGBA8 before = buf.getPixel(x, y);
+		PixelRGBA8 after = m_color;
+
+		if (before.r == after.r && before.g == after.g &&
+			before.b == after.b && before.a == after.a)
 			return;
-		}
 
-		buf.setPixel(x, y, m_color);
+		cmd->recordPixel(x, y, before, after);
+		buf.setPixel(x, y, after);
 	}
 
 private:
