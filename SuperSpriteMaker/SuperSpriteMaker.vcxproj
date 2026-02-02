@@ -154,11 +154,13 @@
     <ClInclude Include="src\model\Layer.h" />
     <ClInclude Include="src\model\PixelBuffer.h" />
     <ClInclude Include="src\model\Sprite.h" />
+    <ClInclude Include="src\structs\BrushBlendMode.h" />
     <ClInclude Include="src\structs\BrushRuntimeState.h" />
     <ClInclude Include="src\structs\BrushSettings.h" />
     <ClInclude Include="src\structs\PixelFormatStruct.h" />
     <ClInclude Include="src\tool\Brush.h" />
     <ClInclude Include="src\tool\Command.h" />
+    <ClInclude Include="src\tool\Pencil.h" />
     <ClInclude Include="src\tool\Stroke.h" />
     <ClInclude Include="src\tool\StrokeCommand.h" />
     <ClInclude Include="src\tool\Tool.h" />

@@ -1,25 +1,27 @@
-#include "Tool.h"
+#include "Pencil.h"
 
-class PencilTool : public Tool {
-public:
-	explicit PencilTool(PixelRGBA8 color) : m_color(color) { m_color.a = 255; }
+PencilTool::PencilTool(const PixelRGBA8& color) : m_color(color) { }
 
-	void apply(Frame* frame, StrokeCommand* cmd, int x, int y) override
-	{
-		PixelBuffer& buf = frame->pixels();
-		if (!buf.inBounds(x, y)) return;
+void PencilTool::setColor(const PixelRGBA8& c) { m_color = c; }
 
-		PixelRGBA8 before = buf.getPixel(x, y);
-		PixelRGBA8 after = m_color;
+void PencilTool::apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure)
+{
+    if (!frame || !cmd) return;
 
-		if (before.r == after.r && before.g == after.g &&
-			before.b == after.b && before.a == after.a)
-			return;
+    PixelBuffer& pb = frame->pixels();
 
-		cmd->recordPixel(x, y, before, after);
-		buf.setPixel(x, y, after);
-	}
+    if (!pb.inBounds(x, y)) return;
 
-private:
-	PixelRGBA8 m_color;
-};
+    PixelRGBA8 before = pb.getPixel(x, y);
+
+    PixelRGBA8 after = m_color;
+
+    if (before.r == after.r &&
+        before.g == after.g &&
+        before.b == after.b &&
+        before.a == after.a)
+        return;
+
+    cmd->recordPixel(x, y, before, after);
+    pb.setPixel(x, y, after);
+}

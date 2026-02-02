@@ -12,7 +12,7 @@ struct BrushSettings {
 
 	BrushSettings() = default;
 
-	BrushSettings(int r, float s, float o, float h) : radius(r), spacing(s), opacity(o), hardness(h) { }
+	BrushSettings(float r, float s, float o, float h) : radius(r), spacing(s), opacity(o), hardness(h) { }
 
 	float falloff(float distance) const 
 	{
