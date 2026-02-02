@@ -1,65 +1,109 @@
-#include <cmath>
-#include "../structs/BrushSettings.h"
-#include "Tool.h"
+#pragma once
+#include "Brush.h"
 
-class BrushTool : public Tool {
-public:
-	BrushTool(const PixelRGBA8& color, const BrushSettings& settings) : m_color(color), m_settings(settings) { }
+BrushTool::BrushTool(const PixelRGBA8& color, const BrushSettings& settings) : m_color(color), m_settings(settings) { }
 
-	void apply(Frame* frame, StrokeCommand* cmd, int cx, int cy) override
-	{
-		PixelBuffer& buf = frame->pixels();
+void BrushTool::apply(Frame* frame, BrushRuntimeState& state, int x, int y, float pressure)
+{
+    if (!frame) return;
 
-		const int r = m_settings.radius;
+    if (state.first)
+    {
+        stamp(frame, x, y, pressure);
+        state.lastX = (float)x;
+        state.lastY = (float)y;
+        state.accumulatedDistance = 0.0f;
+        state.first = false;
+        return;
+    }
 
-		for (int y = -r; y <= r; ++y) 
-		{
-			for (int x = -r; x <= r; ++x) 
-			{
-				const int px = cx + x;
-				const int py = cy + y;
+    float dx = x - state.lastX;
+    float dy = y - state.lastY;
+    float dist = std::sqrt(dx * dx + dy * dy);
 
-				if (!buf.inBounds(px, py)) continue;
+    state.accumulatedDistance += dist;
 
-				const float dist = std::sqrt(float(x * x + y * y));
-				if (dist >= r) continue;
+    float R = (float)m_settings.radius;
+    if (m_settings.sizePressure)
+    {
+        R *= pressure;
+    }
 
-				const float shape = m_settings.falloff(dist);
-				if (shape <= 0.0f) continue;
+    float spacingPx = std::max(1.0f, R * m_settings.spacing);
 
-				const float alphaF = (m_color.a / 255.0f) * m_settings.opacity * shape;
+    float nx = dx / dist;
+    float ny = dy / dist;
 
-				if (alphaF <= 0.0f) continue;
+    while (state.accumulatedDistance >= spacingPx)
+    {
+        state.lastX += nx * spacingPx;
+        state.lastY += ny * spacingPx;
 
-				const uint8_t alpha = uint8_t(alphaF * 255.0f);
+        stamp(frame, (int)std::round(state.lastX), (int)std::round(state.lastY), pressure);
 
-				PixelRGBA8 before = buf.getPixel(px, py);
-				PixelRGBA8 after = blend(before, m_color, alpha);
+        state.accumulatedDistance -= spacingPx;
+    }
+}
 
-				if (before.r == after.r && before.g == after.g &&
-					before.b == after.b && before.a == after.a)
-					continue;
+void BrushTool::stamp(Frame* frame, int cx, int cy, float pressure)
+{
+    PixelBuffer& pb = frame->pixels();
 
-				cmd->recordPixel(px, py, before, after);
-				buf.setPixel(px, py, after);
-			}
-		}
-	}
+    float R = m_settings.radius;
 
-private:
-	PixelRGBA8 m_color;
-	BrushSettings m_settings;
+    if (m_settings.sizePressure)
+    {
+        R *= pressure;
+    }
 
-	static PixelRGBA8 blend(const PixelRGBA8& dst, const PixelRGBA8& src, uint8_t alpha)
-	{
-		const float a = alpha / 255.0f;
-		const float ia = 1.0f - a;
+    int ir = (int)std::ceil(R);
 
-		return PixelRGBA8(
-			uint8_t(dst.r * ia + src.r * a),
-			uint8_t(dst.g * ia + src.g * a),
-			uint8_t(dst.b * ia + src.b * a),
-			255
-		);
-	}
-};
+    for (int y = -ir; y <= ir; ++y)
+    {
+        for (int x = -ir; x <= ir; ++x)
+        {
+            int px = cx + x;
+            int py = cy + y;
+
+            if (!pb.inBounds(px, py)) continue;
+
+            float d = std::sqrt(float(x * x + y * y));
+
+            if (d > R) continue;
+
+            float hardR = m_settings.hardness * R;
+            float alphaFactor;
+
+            if (d <= hardR)
+            {
+                alphaFactor = 1.0f;
+            }
+            else
+            {
+                alphaFactor = 1.0f - (d - hardR) / (R - hardR);
+            }
+
+            float alpha = m_settings.opacity * alphaFactor;
+
+            if (m_settings.opacityPressure) alpha *= pressure;
+
+            PixelRGBA8 src = m_color;
+            src.a = uint8_t(src.a * alpha);
+
+            pb.setPixel(px, py, src);
+        }
+    }
+}
+
+    PixelRGBA8 BrushTool::blend(const PixelRGBA8& dst, const PixelRGBA8& src, uint8_t alpha)
+    {
+        float a = alpha / 255.0f;
+        float ia = 1.0f - a;
+
+        return PixelRGBA8(
+            uint8_t(dst.r * ia + src.r * a),
+            uint8_t(dst.g * ia + src.g * a),
+            uint8_t(dst.b * ia + src.b * a),
+            255
+        );
+    }

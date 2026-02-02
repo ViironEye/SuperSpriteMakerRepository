@@ -1,21 +1,25 @@
 #pragma once
 #include <cmath>
-#include "Tool.h"
+#include "Brush.h"
 
-class Stroke {
+class Stroke
+{
 public:
-    Stroke(Tool* tool, Frame* frame, StrokeCommand* cmd) : m_tool(tool), m_frame(frame), m_cmd(cmd) { }
+    void begin(Frame* frame, BrushTool* tool, int x, int y, float pressure)
+    {
+        m_frame = frame;
+        m_tool = tool;
+        m_state = {};
+        m_tool->apply(frame, m_state, x, y, pressure);
+    }
 
-    void begin(int x, int y);
-    void update(int x, int y);
-    void end();
+    void update(int x, int y, float pressure)
+    {
+        m_tool->apply(m_frame, m_state, x, y, pressure);
+    }
 
 private:
-    Tool* m_tool = nullptr;
     Frame* m_frame = nullptr;
-    StrokeCommand* m_cmd = nullptr;
-
-    int m_lastX = 0;
-    int m_lastY = 0;
-    bool m_active = false;
+    BrushTool* m_tool = nullptr;
+    BrushRuntimeState m_state;
 };

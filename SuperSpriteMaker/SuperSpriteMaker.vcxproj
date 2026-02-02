@@ -143,7 +143,6 @@
     <ClCompile Include="src\model\Sprite.cpp" />
     <ClCompile Include="src\tool\Brush.cpp" />
     <ClCompile Include="src\tool\Pencil.cpp" />
-    <ClCompile Include="src\tool\Stroke.cpp" />
     <ClCompile Include="SuperSpriteMaker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,8 +154,10 @@
     <ClInclude Include="src\model\Layer.h" />
     <ClInclude Include="src\model\PixelBuffer.h" />
     <ClInclude Include="src\model\Sprite.h" />
+    <ClInclude Include="src\structs\BrushRuntimeState.h" />
     <ClInclude Include="src\structs\BrushSettings.h" />
     <ClInclude Include="src\structs\PixelFormatStruct.h" />
+    <ClInclude Include="src\tool\Brush.h" />
     <ClInclude Include="src\tool\Command.h" />
     <ClInclude Include="src\tool\Stroke.h" />
     <ClInclude Include="src\tool\StrokeCommand.h" />

@@ -2,13 +2,17 @@
 #include <cstdint>
 
 struct BrushSettings {
-	int radius = 1;
+	float radius = 1.0f;
+	float spacing = 0.25f;
 	float opacity = 1.0f;
 	float hardness = 1.0f;
 
+	bool sizePressure = true;
+	bool opacityPressure = true;
+
 	BrushSettings() = default;
 
-	BrushSettings(int r, float o, float h) : radius(r), opacity(o), hardness(h) { }
+	BrushSettings(int r, float s, float o, float h) : radius(r), spacing(s), opacity(o), hardness(h) { }
 
 	float falloff(float distance) const 
 	{
