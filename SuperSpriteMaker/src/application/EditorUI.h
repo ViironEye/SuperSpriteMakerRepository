@@ -1,5 +1,6 @@
 #pragma once
 #include "SpriteEditor.h"
+#include "GLTexturePresenter.h"
 #include "Viewport.h"
 #include "../../imgui/imgui.h"
 
@@ -16,6 +17,9 @@ public:
 private:
     SpriteEditor* m_editor = nullptr;
     Viewport m_vp;
+
+    GLTexturePresenter m_presenter;
+    PresenterOptions m_presentOpt;
 
     // UI state
     int m_toolIndex = 0; // 0 pencil, 1 ink, 2 brush, 3 eraser, 4 select, 5 move

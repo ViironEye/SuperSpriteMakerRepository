@@ -143,22 +143,15 @@ void PixelBuffer::blitFrom(const PixelBuffer& src, int sx, int sy, int sw, int s
 void PixelBuffer::uploadToGLTexture(GLuint tex) const
 {
     glBindTexture(GL_TEXTURE_2D, tex);
-
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    GLenum formatGL = (m_format == PixelFormat::RGBA8) ? GL_RGBA : GL_RED;
-    GLenum internalFmt = (m_format == PixelFormat::RGBA8) ? GL_RGBA8 : GL_R8;
+    // Предполагаем GL_RGBA/GL_UNSIGNED_BYTE
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height,
+        GL_RGBA, GL_UNSIGNED_BYTE, m_pixels.data());
 
-    glTexImage2D(GL_TEXTURE_2D,
-        0,
-        internalFmt,
-        m_width, m_height,
-        0,
-        formatGL,
-        GL_UNSIGNED_BYTE,
-        m_pixels.data()
-    );
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 uint8_t* PixelBuffer::raw() 
 {

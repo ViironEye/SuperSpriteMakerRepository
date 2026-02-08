@@ -145,6 +145,7 @@
     <ClCompile Include="..\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\application\App.cpp" />
     <ClCompile Include="src\application\EditorUI.cpp" />
+    <ClCompile Include="src\application\GLTextureCache.cpp" />
     <ClCompile Include="src\application\GLTexturePresenter.cpp" />
     <ClCompile Include="src\application\Viewport.cpp" />
     <ClCompile Include="src\model\Canvas.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="..\imgui\imgui_internal.h" />
     <ClInclude Include="src\application\App.h" />
     <ClInclude Include="src\application\EditorUI.h" />
+    <ClInclude Include="src\application\GLTextureCache.h" />
     <ClInclude Include="src\application\GLTexturePresenter.h" />
     <ClInclude Include="src\application\Viewport.h" />
     <ClInclude Include="src\enums\BlendMode.h" />
