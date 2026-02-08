@@ -2,6 +2,14 @@
 #include <cstring>
 #include <cassert>
 
+PixelBuffer::PixelBuffer()
+{
+    m_bpp = 0;
+    m_stride = 0;
+    m_width = 0;
+    m_height = 0;
+}
+
 PixelBuffer::PixelBuffer(int width, int height, PixelFormat fmt) : m_width(width), m_height(height), m_format(fmt)
 {
     m_bpp = bytesPerPixel(fmt);

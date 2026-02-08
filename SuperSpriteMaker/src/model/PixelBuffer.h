@@ -8,6 +8,7 @@
 
 class PixelBuffer {
 public:
+    PixelBuffer();
     PixelBuffer(int width, int height, PixelFormat fmt = PixelFormat::RGBA8);
 
     void clear(const PixelRGBA8& color);

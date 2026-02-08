@@ -7,7 +7,7 @@ public:
 
     void setColor(const PixelRGBA8& c);
 
-    void apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure) override;
+    void apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure) override;
 
 private:
     PixelRGBA8 m_color;

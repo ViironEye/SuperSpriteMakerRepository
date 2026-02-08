@@ -4,7 +4,7 @@ PencilTool::PencilTool(const PixelRGBA8& color) : m_color(color) { }
 
 void PencilTool::setColor(const PixelRGBA8& c) { m_color = c; }
 
-void PencilTool::apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure)
+void PencilTool::apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure)
 {
     if (!frame || !cmd) return;
 
