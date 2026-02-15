@@ -1,4 +1,7 @@
 #include "EditorUI.h"
+#include "../tool/BrushOverlay.h"
+#include "../tool/Brush.h"
+#include "../tool/SelectionOverlayUI.h"
 
 static Modifiers modsFromImGui()
 {
@@ -87,37 +90,49 @@ void EditorUI::draw()
         }
     }
 
-    // ----- input -> SpriteEditor -----
-    if (hovered) {
+    if (hovered)
+    {
         int cx, cy;
-        if (m_vp.screenToCanvas(io.MousePos.x, io.MousePos.y, cx, cy)) {
-            float pressure = 1.0f; // мышь; позже заменишь на tablet pressure
+        if (m_vp.screenToCanvas(io.MousePos.x, io.MousePos.y, cx, cy))
+        {
+            float pressure = 1.0f;
 
-            Modifiers mods = modsFromImGui();
-
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-                m_editor->pointerDown(cx, cy, pressure, mods);
-
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
-                m_editor->pointerMove(cx, cy, pressure, mods);
-
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-                m_editor->pointerUp(cx, cy, pressure, mods);
+            Tool* t = m_editor->tool();
+            if (auto* brush = dynamic_cast<BrushTool*>(t))
+            {
+                BrushOverlay::drawBrushCircle(
+                    m_vp, cx, cy,
+                    brush->settings(),
+                    pressure,
+                    true
+                );
+            }
         }
-
-        // commit/cancel move
-        if (ImGui::IsKeyPressed(ImGuiKey_Escape)) m_editor->keyEsc();
-        if (ImGui::IsKeyPressed(ImGuiKey_Enter))  m_editor->keyEnter();
     }
 
-    // marching ants animation tick
     m_editor->tick();
 
-    // Тут позже будет отрисовка:
-    // 1) canvas.renderFrame(...)
-    // 2) uploadToGLTexture
-    // 3) ImGui::Image(texture, ...)
-    ImGui::Text("Render hook goes here (texture upload + ImGui::Image)");
+    Frame* f = m_editor->activeFrame();
+    if (f)
+    {
+        m_presentOpt.flipY = true;
+        m_presentOpt.checkerboard = true;
+        m_presentOpt.grid = true;
+        m_presentOpt.gridMinZoom = 8;
+        m_presentOpt.outline = true;
+
+        m_presenter.present(f->pixels(), m_vp, m_presentOpt);
+
+        if (m_editor->moveSession().active())
+            SelectionOverlayUI::drawMoveOutline(m_vp, m_editor->moveSession(), true);
+        else
+            SelectionOverlayUI::drawSelectionOutline(m_vp, m_editor->selection(), true);
+    }
+    else
+    {
+        ImGui::Text("No active frame");
+    }
 
     ImGui::End();
+
 }

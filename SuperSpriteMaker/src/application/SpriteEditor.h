@@ -64,6 +64,9 @@ public:
     int selectionPhase() const { return m_phase; }
     void tick() { ++m_phase; } // вызывать раз в кадр
 
+    SelectionMoveSession& moveSession() { return m_moveSession; }
+    const SelectionMoveSession& moveSession() const { return m_moveSession; }
+
 private:
     SelectionOp selectionOpFromMods(const Modifiers& mods) const;
 

@@ -158,6 +158,15 @@ public:
 
         m_active = false;
     }
+
+    int boundsX() const { return m_boundsX; }
+    int boundsY() const { return m_boundsY; }
+    int boundsW() const { return m_boundsW; }
+    int boundsH() const { return m_boundsH; }
+
+    int offsetX() const { return m_offsetX; }
+    int offsetY() const { return m_offsetY; }
+
 private:
     bool m_active = false;
     Frame* m_frame = nullptr;

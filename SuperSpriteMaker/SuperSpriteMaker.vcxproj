@@ -155,9 +155,12 @@
     <ClCompile Include="src\model\Sprite.cpp" />
     <ClCompile Include="src\tool\BlendModes.cpp" />
     <ClCompile Include="src\tool\Brush.cpp" />
+    <ClCompile Include="src\tool\BrushOverlay.cpp" />
     <ClCompile Include="src\tool\InlTool.cpp" />
     <ClCompile Include="src\tool\Pencil.cpp" />
     <ClCompile Include="src\application\SpriteEditor.cpp" />
+    <ClCompile Include="src\tool\SelectionOverlayUI.cpp" />
+    <ClCompile Include="src\tool\ShapeTool.cpp" />
     <ClCompile Include="SuperSpriteMaker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +176,7 @@
     <ClInclude Include="src\application\Viewport.h" />
     <ClInclude Include="src\enums\BlendMode.h" />
     <ClInclude Include="src\enums\PixelFormat.h" />
+    <ClInclude Include="src\enums\ShapeMode.h" />
     <ClInclude Include="src\model\Canvas.h" />
     <ClInclude Include="src\model\Cel.h" />
     <ClInclude Include="src\model\Frame.h" />
@@ -183,8 +187,10 @@
     <ClInclude Include="src\structs\BrushRuntimeState.h" />
     <ClInclude Include="src\structs\BrushSettings.h" />
     <ClInclude Include="src\structs\PixelFormatStruct.h" />
+    <ClInclude Include="src\structs\ShapeSettings.h" />
     <ClInclude Include="src\tool\BlendModes.h" />
     <ClInclude Include="src\tool\Brush.h" />
+    <ClInclude Include="src\tool\BrushOverlay.h" />
     <ClInclude Include="src\tool\Command.h" />
     <ClInclude Include="src\tool\InkTool.h" />
     <ClInclude Include="src\tool\Pencil.h" />
@@ -193,6 +199,8 @@
     <ClInclude Include="src\tool\SelectionMoveSession.h" />
     <ClInclude Include="src\tool\SelectionOverlay.h" />
     <ClInclude Include="src\application\SpriteEditor.h" />
+    <ClInclude Include="src\tool\SelectionOverlayUI.h" />
+    <ClInclude Include="src\tool\ShapeTool.h" />
     <ClInclude Include="src\tool\Stroke.h" />
     <ClInclude Include="src\tool\StrokeCommand.h" />
     <ClInclude Include="src\tool\Tool.h" />

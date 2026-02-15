@@ -21,6 +21,8 @@ public:
     //void apply(Frame* frame, BrushRuntimeState& state, int x, int y, float pressure);
     void apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure) override;
 
+    const BrushSettings& settings() const { return m_settings; }
+
 private:
     PixelRGBA8 m_color{ 0,0,0,255 };
     BrushSettings m_settings;
