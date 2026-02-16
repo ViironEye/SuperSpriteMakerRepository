@@ -2,9 +2,6 @@
 
 SelectionOp SpriteEditor::selectionOpFromMods(const Modifiers& mods) const
 {
-    // Классика:
-    // Shift -> Add
-    // Ctrl  -> Subtract
     if (mods.ctrl)  return SelectionOp::Subtract;
     if (mods.shift) return SelectionOp::Add;
     return SelectionOp::Replace;
@@ -22,7 +19,7 @@ void SpriteEditor::pointerDown(int x, int y, float pressure, const Modifiers& mo
         m_strokeCmd = std::make_unique<StrokeCommand>(frame);
         m_stroke = std::make_unique<Stroke>(m_tool, frame, m_strokeCmd.get());
 
-        m_stroke->begin(x, y, pressure); // ВАЖНО: обнови Stroke чтобы принимал pressure
+        m_stroke->begin(x, y, pressure);
         return;
     }
 
@@ -35,10 +32,8 @@ void SpriteEditor::pointerDown(int x, int y, float pressure, const Modifiers& mo
 
     if (m_mode == EditorMode::MoveSelect)
     {
-        // Начинаем move session (cut по умолчанию)
         if (!m_moveSession.active())
         {
-            // Shift можно трактовать как Copy (по желанию)
             MoveMode mm = mods.alt ? MoveMode::Copy : MoveMode::Cut;
             if (!m_moveSession.begin(frame, m_selection, mm))
                 return;
@@ -89,12 +84,11 @@ void SpriteEditor::pointerUp(int x, int y, float pressure, const Modifiers& mods
     if (m_mode == EditorMode::Draw)
     {
         if (m_stroke) {
-            m_stroke->end();
+            m_stroke->end(x, y, pressure);
             m_stroke.reset();
         }
 
         if (m_strokeCmd) {
-            // Пушим только если реально были изменения (можно добавить cmd->empty())
             m_undo.push(std::move(m_strokeCmd));
         }
         return;
@@ -109,8 +103,6 @@ void SpriteEditor::pointerUp(int x, int y, float pressure, const Modifiers& mods
     if (m_mode == EditorMode::MoveSelect)
     {
         m_draggingMove = false;
-        // По mouse up не коммитим автоматически — как в редакторах:
-        // Enter commit, Esc cancel (или можно auto-commit, если хочешь).
         return;
     }
 }

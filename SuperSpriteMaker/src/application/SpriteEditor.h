@@ -6,27 +6,24 @@
 #include "../model/Sprite.h"
 #include "../model/Frame.h"
 #include "../tool/UndoStack.h"
-#include "../tool/Stroke.h"      // твой Stroke
+#include "../tool/Stroke.h"
 #include "../tool/SelectionMask.h"
 #include "../tool/SelectionMoveSession.h"
 #include "../tool/RectSelectTool.h"
 #include "../tool/Tool.h"
 
-// Какие действия сейчас активны
 enum class EditorMode {
-    Draw,       // Pencil/Ink/Brush/Eraser
-    SelectRect, // Rect select
-    MoveSelect  // Move selection
+    Draw,
+    SelectRect,
+    MoveSelect
 };
 
-// Состояние модификаторов клавиатуры
 struct Modifiers {
     bool shift = false;
     bool ctrl = false;
     bool alt = false;
 };
 
-// Простейший контроллер: хранит активные объекты и обрабатывает input.
 class SpriteEditor {
 public:
     explicit SpriteEditor(Sprite* sprite)

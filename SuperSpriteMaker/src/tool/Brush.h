@@ -19,7 +19,7 @@ public:
     void setColor(const PixelRGBA8& c) { m_color = c; }
 
     //void apply(Frame* frame, BrushRuntimeState& state, int x, int y, float pressure);
-    void apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure) override;
+    void apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure) override;
 
     const BrushSettings& settings() const { return m_settings; }
 

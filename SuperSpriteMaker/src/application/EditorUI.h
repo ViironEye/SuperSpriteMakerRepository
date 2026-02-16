@@ -21,6 +21,5 @@ private:
     GLTexturePresenter m_presenter;
     PresenterOptions m_presentOpt;
 
-    // UI state
-    int m_toolIndex = 0; // 0 pencil, 1 ink, 2 brush, 3 eraser, 4 select, 5 move
+    int m_toolIndex = 0;
 };

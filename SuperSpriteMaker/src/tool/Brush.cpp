@@ -46,8 +46,10 @@ BrushTool::BrushTool(const BrushSettings& settings, BrushBlendMode mode) : m_set
         state.accumulatedDistance -= spacingPx;
     }
 } */
-void BrushTool::apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure)
+void BrushTool::apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure)
 {
+    BrushRuntimeState state = m_state;
+
     if (!frame || !cmd) return;
 
     if (state.first)
