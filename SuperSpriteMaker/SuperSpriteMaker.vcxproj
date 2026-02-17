@@ -147,6 +147,7 @@
     <ClCompile Include="src\application\EditorUI.cpp" />
     <ClCompile Include="src\application\GLTextureCache.cpp" />
     <ClCompile Include="src\application\GLTexturePresenter.cpp" />
+    <ClCompile Include="src\application\ToolAtlas.cpp" />
     <ClCompile Include="src\application\Viewport.cpp" />
     <ClCompile Include="src\model\Canvas.cpp" />
     <ClCompile Include="src\model\Frame.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="src\application\EditorUI.h" />
     <ClInclude Include="src\application\GLTextureCache.h" />
     <ClInclude Include="src\application\GLTexturePresenter.h" />
+    <ClInclude Include="src\application\ToolAtlas.h" />
     <ClInclude Include="src\application\Viewport.h" />
     <ClInclude Include="src\enums\BlendMode.h" />
     <ClInclude Include="src\enums\PixelFormat.h" />

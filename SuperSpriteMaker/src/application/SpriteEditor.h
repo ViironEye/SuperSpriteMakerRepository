@@ -33,7 +33,6 @@ public:
             m_selection.resize(m_sprite->width(), m_sprite->height());
     }
 
-    // ====== Active context ======
     void setActiveFrameIndex(int i) { m_activeFrame = i; }
     int  activeFrameIndex() const { return m_activeFrame; }
     Frame* activeFrame() const { return m_sprite ? m_sprite->getFrame(m_activeFrame) : nullptr; }
@@ -49,17 +48,15 @@ public:
 
     UndoStack& undo() { return m_undo; }
 
-    // ====== Input API (UI вызывает это) ======
     void pointerDown(int x, int y, float pressure, const Modifiers& mods);
     void pointerMove(int x, int y, float pressure, const Modifiers& mods);
     void pointerUp(int x, int y, float pressure, const Modifiers& mods);
 
-    void keyEsc();   // cancel move
-    void keyEnter(); // commit move
+    void keyEsc();
+    void keyEnter();
 
-    // Для marching ants
     int selectionPhase() const { return m_phase; }
-    void tick() { ++m_phase; } // вызывать раз в кадр
+    void tick() { ++m_phase; }
 
     SelectionMoveSession& moveSession() { return m_moveSession; }
     const SelectionMoveSession& moveSession() const { return m_moveSession; }
@@ -74,23 +71,18 @@ private:
     EditorMode m_mode = EditorMode::Draw;
     Tool* m_tool = nullptr;
 
-    // Undo
     UndoStack m_undo;
 
-    // Drawing stroke
     std::unique_ptr<StrokeCommand> m_strokeCmd;
-    std::unique_ptr<Stroke> m_stroke; // твой Stroke(Tool*, Frame*, StrokeCommand*)
+    std::unique_ptr<Stroke> m_stroke;
 
-    // Selection
     SelectionMask m_selection;
     RectSelectTool m_rectSelect;
 
-    // Move selection
     SelectionMoveSession m_moveSession;
     bool m_draggingMove = false;
     int m_moveStartX = 0;
     int m_moveStartY = 0;
 
-    // marching ants phase
     int m_phase = 0;
 };

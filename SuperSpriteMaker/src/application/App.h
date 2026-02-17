@@ -20,7 +20,6 @@ public:
     App(const App&) = delete;
     App& operator=(const App&) = delete;
 
-    // Создаёт окно, GL, ImGui и минимальный документ
     bool init(int width = 1280, int height = 720, const char* title = "SuperSpriteMaker");
     int  run();
     void shutdown();

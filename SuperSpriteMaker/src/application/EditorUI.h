@@ -3,6 +3,11 @@
 #include "GLTexturePresenter.h"
 #include "Viewport.h"
 #include "../../imgui/imgui.h"
+#include "ToolAtlas.h"
+#include "../tool/Pencil.h"
+#include "../tool/Brush.h"
+#include "../tool/InkTool.h"
+#include "../tool/ShapeTool.h"
 
 class EditorUI
 {
@@ -11,7 +16,7 @@ public:
         : m_editor(editor) {
     }
 
-    void draw();                // рисует весь UI
+    void draw();
     Viewport& viewport() { return m_vp; }
 
 private:
@@ -21,5 +26,15 @@ private:
     GLTexturePresenter m_presenter;
     PresenterOptions m_presentOpt;
 
+    PencilTool m_pencil{ PixelRGBA8(0,0,0,255) };
+    InkTool    m_ink{ PixelRGBA8(0,0,0,255) };
+    BrushTool  m_brush{ PixelRGBA8(0,0,0,255), BrushSettings() };
+
+    ShapeSettings m_shapeSettings;
+    ShapeTool     m_shapeTool{ m_shapeSettings };
+
     int m_toolIndex = 0;
+
+    ToolAtlas m_toolAtlas;
+    bool m_atlasReady = false;
 };

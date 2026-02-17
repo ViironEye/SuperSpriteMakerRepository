@@ -18,10 +18,12 @@ public:
 
     void setColor(const PixelRGBA8& c) { m_color = c; }
 
-    //void apply(Frame* frame, BrushRuntimeState& state, int x, int y, float pressure);
     void apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure) override;
 
     const BrushSettings& settings() const { return m_settings; }
+
+    void setEraser(bool b) { m_mode = b ? BrushBlendMode::Erase : BrushBlendMode::Normal; }
+    bool isEraser() const { return BrushBlendMode::Erase == m_mode; }
 
 private:
     PixelRGBA8 m_color{ 0,0,0,255 };
@@ -29,7 +31,6 @@ private:
     BrushRuntimeState m_state;
     BrushBlendMode m_mode;
 
-    //void stamp(Frame* frame, int cx, int cy, float pressure);
     void stamp(Frame* frame, StrokeCommand* cmd, int cx, int cy, float pressure);
 
     static PixelRGBA8 blend(const PixelRGBA8& dst, const PixelRGBA8& src, uint8_t alpha);
