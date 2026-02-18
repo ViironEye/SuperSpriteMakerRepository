@@ -2,6 +2,8 @@
 #include "../tool/BrushOverlay.h"
 #include "../tool/Brush.h"
 #include "../tool/SelectionOverlayUI.h"
+#include "../tool/ShapeOverlay.h"
+#include "../structs/ShapeSettings.h"
 #include <iostream>
 
 static Modifiers modsFromImGui()
@@ -108,6 +110,7 @@ void EditorUI::draw()
     ImGui::BeginChild("ToolsArea", ImVec2(160.f, 140.f), true, ImGuiWindowFlags_NoScrollbar);
     iconBtn(0, "Pencil"); ImGui::SameLine(); iconBtn(1, "Ink"); ImGui::SameLine(); iconBtn(2, "Brush");
     iconBtn(3, "Eraser"); ImGui::SameLine(); iconBtn(4, "Select"); ImGui::SameLine(); iconBtn(5, "Move");
+    iconBtn(6, "Shapes");
 
     PixelRGBA8 currentColor = toPixel(m_color);
 
@@ -147,11 +150,24 @@ void EditorUI::draw()
         m_shapeTool.setColor(currentColor);
         m_shapeTool.setSettings(m_shapeSettings);
         m_editor->setTool(&m_shapeTool);
+        m_paramsPanel = ToolParamsPanel::Shape;
         break;
     }
 
-    shapeClicked = iconBtn(6, "Shape");
-    if (shapeClicked) ImGui::OpenPopup("ShapeModePopup");
+    if (shapeClicked)
+    {
+        if (m_toolIndex == 6)
+        {
+            m_paramsPanel = ToolParamsPanel::Shape;
+            ImGui::OpenPopup("ShapeModePopup");
+        }
+    }
+    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+    {
+        m_toolIndex = 6;
+        m_paramsPanel = ToolParamsPanel::Shape;
+        ImGui::OpenPopup("ShapeModePopup");
+    }
 
     if (ImGui::BeginPopup("ShapeModePopup"))
     {
@@ -241,6 +257,61 @@ void EditorUI::draw()
         ImGui::SliderFloat("Hardness", &s.hardness, 0.0f, 1.0f, "%.2f");
         ImGui::Checkbox("Size Pressure", &s.sizePressure);
         ImGui::Checkbox("Opacity Pressure", &s.opacityPressure);
+        break;
+    }
+    case ToolParamsPanel::Shape:
+    {
+        ImGui::TextUnformatted("Shape");
+        ImGui::Separator();
+
+        int mode = (int)m_shapeSettings.mode;
+        const char* modes[] = { "Rectangle", "Ellipse", "Line" };
+        ImGui::Text("Mode: %s", modes[mode]);
+
+        if (ImGui::Button("Change Mode..."))
+            ImGui::OpenPopup("ShapeModePopup");
+
+        // можно продублировать быстрый выбор прямо здесь:
+        if (ImGui::RadioButton("Rectangle##shape", mode == 0)) mode = 0;
+        if (ImGui::RadioButton("Ellipse##shape", mode == 1)) mode = 1;
+        if (ImGui::RadioButton("Line##shape", mode == 2)) mode = 2;
+
+        if (mode != 2)
+            ImGui::Checkbox("Filled", &m_shapeSettings.filled);
+        else
+            m_shapeSettings.filled = false;
+
+        ImGui::SliderInt("Thickness", &m_shapeSettings.thickness, 1, 16);
+
+        m_shapeSettings.mode = (ShapeMode)mode;
+        m_shapeTool.setSettings(m_shapeSettings);
+
+        // сам popup (общий) может жить тут же — он глобален в рамках окна
+        if (ImGui::BeginPopup("ShapeModePopup"))
+        {
+            int pmode = (int)m_shapeSettings.mode;
+
+            ImGui::TextUnformatted("Shape Mode");
+            ImGui::Separator();
+
+            if (ImGui::RadioButton("Rectangle", pmode == 0)) pmode = 0;
+            if (ImGui::RadioButton("Ellipse", pmode == 1)) pmode = 1;
+            if (ImGui::RadioButton("Line", pmode == 2)) pmode = 2;
+
+            ImGui::Separator();
+            if (pmode != 2)
+                ImGui::Checkbox("Filled", &m_shapeSettings.filled);
+            else
+                m_shapeSettings.filled = false;
+
+            ImGui::SliderInt("Thickness", &m_shapeSettings.thickness, 1, 16);
+
+            m_shapeSettings.mode = (ShapeMode)pmode;
+            m_shapeTool.setSettings(m_shapeSettings);
+
+            ImGui::EndPopup();
+        }
+
         break;
     }
     default:
@@ -366,6 +437,22 @@ void EditorUI::draw()
             SelectionOverlayUI::drawMoveOutline(m_vp, m_editor->moveSession(), true);
         else
             SelectionOverlayUI::drawSelectionOutline(m_vp, m_editor->selection(), true);
+
+        Tool* t = m_editor->tool();
+        if (auto* shape = dynamic_cast<ShapeTool*>(t))
+        {
+            if (shape->isActive())
+            {
+                ShapeOverlay::drawPreview(
+                    m_vp,
+                    shape->x0(), shape->y0(),
+                    shape->x1(), shape->y1(),
+                    shape->settings(),
+                    shape->color()
+                );
+            }
+        }
+
     }
     else
     {

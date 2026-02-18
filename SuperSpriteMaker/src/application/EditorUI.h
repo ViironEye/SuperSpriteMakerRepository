@@ -14,7 +14,8 @@ enum class ToolParamsPanel
     None,
     Ink,
     Brush,
-    Eraser
+    Eraser,
+    Shape
 };
 
 class EditorUI

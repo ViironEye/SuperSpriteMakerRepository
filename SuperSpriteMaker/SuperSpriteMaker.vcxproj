@@ -161,6 +161,7 @@
     <ClCompile Include="src\tool\Pencil.cpp" />
     <ClCompile Include="src\application\SpriteEditor.cpp" />
     <ClCompile Include="src\tool\SelectionOverlayUI.cpp" />
+    <ClCompile Include="src\tool\ShapeOverlay.cpp" />
     <ClCompile Include="src\tool\ShapeTool.cpp" />
     <ClCompile Include="SuperSpriteMaker.cpp" />
   </ItemGroup>
@@ -203,6 +204,7 @@
     <ClInclude Include="src\tool\SelectionOverlay.h" />
     <ClInclude Include="src\application\SpriteEditor.h" />
     <ClInclude Include="src\tool\SelectionOverlayUI.h" />
+    <ClInclude Include="src\tool\ShapeOverlay.h" />
     <ClInclude Include="src\tool\ShapeTool.h" />
     <ClInclude Include="src\tool\Stroke.h" />
     <ClInclude Include="src\tool\StrokeCommand.h" />
