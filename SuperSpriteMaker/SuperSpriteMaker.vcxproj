@@ -188,6 +188,7 @@
     <ClInclude Include="src\structs\BrushBlendMode.h" />
     <ClInclude Include="src\structs\BrushRuntimeState.h" />
     <ClInclude Include="src\structs\BrushSettings.h" />
+    <ClInclude Include="src\structs\InkSettings.h" />
     <ClInclude Include="src\structs\PixelFormatStruct.h" />
     <ClInclude Include="src\structs\ShapeSettings.h" />
     <ClInclude Include="src\tool\BlendModes.h" />

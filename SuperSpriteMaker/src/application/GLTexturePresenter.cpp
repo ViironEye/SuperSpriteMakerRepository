@@ -14,25 +14,20 @@ bool GLTexturePresenter::present(const PixelBuffer& pb,
     if (imgW <= 0 || imgH <= 0)
         return false;
 
-    // 1) Upload -> texture cache
     m_cache.upload(pb);
 
-    // 2) Clip строго в пределах viewport-окна ImGui
     const ImVec2 clipMin(vp.originX, vp.originY);
     const ImVec2 clipMax(vp.originX + vp.viewW, vp.originY + vp.viewH);
     DL()->PushClipRect(clipMin, clipMax, true);
 
-    // 3) Экранный прямоугольник изображения с учетом pan/zoom
     const float x0 = vp.originX + vp.panX;
     const float y0 = vp.originY + vp.panY;
     const float x1 = x0 + imgW * vp.zoom;
     const float y1 = y0 + imgH * vp.zoom;
 
-    // 4) Checkerboard под изображением
     if (opt.checkerboard)
         drawCheckerboard(vp, imgW, imgH, opt.checkerCellCanvasPx);
 
-    // 5) Image
     const ImVec2 pMin(x0, y0);
     const ImVec2 pMax(x1, y1);
 
@@ -41,11 +36,9 @@ bool GLTexturePresenter::present(const PixelBuffer& pb,
 
     DL()->AddImage(m_cache.imguiID(), pMin, pMax, uv0, uv1);
 
-    // 6) Outline поверх (полезно на светлом фоне)
     if (opt.outline)
         drawOutline(vp, imgW, imgH);
 
-    // 7) Grid поверх
     if (opt.grid && (int)vp.zoom >= opt.gridMinZoom)
         drawGrid(vp, imgW, imgH);
 

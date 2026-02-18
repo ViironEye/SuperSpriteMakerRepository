@@ -204,6 +204,12 @@ void App::createDocument()
 
     m_sprite = std::make_unique<Sprite>(w, h, PixelFormat::RGBA8);
 
+    Frame* f0 = m_sprite->createFrame(100);
+    (void)f0;
+
+    Layer* l0 = m_sprite->createLayer("Layer 1");
+
+    l0->addCel(0, new Cel(m_sprite->getFrame(0)));
     m_editor = std::make_unique<SpriteEditor>(m_sprite.get());
     m_editor->setActiveFrameIndex(0);
 

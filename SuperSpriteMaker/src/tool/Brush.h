@@ -20,6 +20,7 @@ public:
 
     void apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure) override;
 
+    BrushSettings& settings() { return m_settings; }
     const BrushSettings& settings() const { return m_settings; }
 
     void setEraser(bool b) { m_mode = b ? BrushBlendMode::Erase : BrushBlendMode::Normal; }

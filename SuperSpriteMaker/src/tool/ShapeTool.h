@@ -19,6 +19,7 @@ public:
 
     // Tool::apply не используем для shapes
     void apply(Frame*, StrokeCommand*, int, int, float) override {}
+    void setColor(const PixelRGBA8& c) { m_color = c; }
 
 private:
     void rasterize(Frame* frame, StrokeCommand* cmd);

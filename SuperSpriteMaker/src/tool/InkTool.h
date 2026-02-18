@@ -3,9 +3,8 @@
 #pragma once
 #include "Tool.h"
 #include "../model/PixelBuffer.h"
+#include "../structs/InkSettings.h"
 
-// InkTool: рисует 1px (как Pencil), но с чувствительностью к нажатию:
-// pressure (0..1) масштабирует альфу.
 class InkTool : public Tool
 {
 public:
@@ -15,8 +14,9 @@ public:
     }
 
     void setColor(const PixelRGBA8& c) { m_color = c; }
+    InkSettings& settings() { return m_settings; }
+    const InkSettings& settings() const { return m_settings; }
 
-    // pressure: 0..1 (мышь обычно 1.0)
     void apply(Frame* frame,
         StrokeCommand* cmd,
         int x, int y,
@@ -24,6 +24,7 @@ public:
 
 private:
     PixelRGBA8 m_color;
+    InkSettings m_settings;
 
     static uint8_t clampU8(int v)
     {

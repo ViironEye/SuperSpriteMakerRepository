@@ -227,5 +227,8 @@
     <ClInclude Include="src\application\ToolAtlas.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\structs\InkSettings.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
