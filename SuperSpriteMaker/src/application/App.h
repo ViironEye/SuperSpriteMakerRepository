@@ -24,6 +24,9 @@ public:
     int  run();
     void shutdown();
 
+    //void update();
+    void render();
+
     GLFWwindow* window() const { return m_window; }
 
 private:
@@ -37,11 +40,15 @@ private:
     void frameRender();
     void frameEnd();
 
-    void createDocument();
+    void showNewSpriteDialog();
+    void createDocument(int w, int h);
 
-private:
     GLFWwindow* m_window = nullptr;
     bool m_running = false;
+    bool m_showNewSpriteDialog = true;
+
+    int m_newWidth = 64;
+    int m_newHeight = 64;
 
     std::unique_ptr<Sprite> m_sprite;
     std::unique_ptr<SpriteEditor> m_editor;

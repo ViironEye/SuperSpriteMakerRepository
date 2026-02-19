@@ -18,6 +18,7 @@
 #include "../tool/InkTool.h"
 #include "../tool/Brush.h"
 #include "../tool/ShapeTool.h"
+
 static void glfw_error_callback(int error, const char* description)
 {
     std::fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -42,10 +43,61 @@ bool App::init(int width, int height, const char* title)
     if (!initImGui())
         return false;
 
-    createDocument();
-
+    m_showNewSpriteDialog = true;
     m_running = true;
     return true;
+}
+
+void App::render()
+{
+    if (m_showNewSpriteDialog)
+    {
+        showNewSpriteDialog();
+    }
+
+    if (!m_showNewSpriteDialog && m_ui)
+        m_ui->draw();
+}
+
+void App::showNewSpriteDialog()
+{
+    ImGui::OpenPopup("New Sprite");
+
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("New Sprite", nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextUnformatted("Create New Sprite");
+        ImGui::Separator();
+
+        ImGui::InputInt("Width", &m_newWidth);
+        ImGui::InputInt("Height", &m_newHeight);
+
+        if (m_newWidth < 1)  m_newWidth = 1;
+        if (m_newHeight < 1) m_newHeight = 1;
+        if (m_newWidth > INT32_MAX) m_newWidth = INT32_MAX;
+        if (m_newHeight > INT32_MAX) m_newHeight = INT32_MAX;
+
+        ImGui::Spacing();
+
+        if (ImGui::Button("Create", ImVec2(120, 0)))
+        {
+            createDocument(m_newWidth, m_newHeight);
+            m_showNewSpriteDialog = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Exit", ImVec2(120, 0)))
+        {
+            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+        }
+
+        ImGui::EndPopup();
+    }
 }
 
 int App::run()
@@ -177,8 +229,7 @@ void App::frameBegin()
 
 void App::frameRender()
 {
-    if (m_ui)
-        m_ui->draw();
+    render();
 
     ImGui::Render();
 
@@ -197,11 +248,8 @@ void App::frameEnd()
     glfwSwapBuffers(m_window);
 }
 
-void App::createDocument()
+void App::createDocument(int w, int h)
 {
-    const int w = 64;
-    const int h = 64;
-
     m_sprite = std::make_unique<Sprite>(w, h, PixelFormat::RGBA8);
 
     Frame* f0 = m_sprite->createFrame(100);
