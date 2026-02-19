@@ -3,33 +3,40 @@
 #include "../enums/BlendMode.h"
 #include <memory>
 
-class Layer {
+class Cel;
+
+class Layer
+{
 public:
-	explicit Layer(const std::string& name);
+    explicit Layer(const std::string& name) : m_name(name) {}
 
-	void addCel(int frameIndex, Cel* cel);
-	Cel* getCel(int frameIndex);
-	const Cel* getCel(int frameIndex) const;
-	void setCel(int frameIndex, Cel* cel);
-	void deleteCel(int frameIndex);
+    void ensureFrameCount(int frames);
+    void addEmptyCel(int frameIndex);
+    Cel* getCel(int frameIndex);
+    const Cel* getCel(int frameIndex) const;
 
-	const std::string& name() const { return m_name; }
-	void setName(const std::string& n) { m_name = n; }
+    void setCel(int frameIndex, std::unique_ptr<Cel> cel);
+    void deleteCel(int frameIndex);
 
-	bool visible() const { return m_visible; }
-	void setVisible(bool v) { m_visible = v; }
+    const std::string& name() const { return m_name; }
+    void setName(const std::string& n) { m_name = n; }
 
-	uint8_t opacity() const { return m_opacity; }
-	void setOpacity(uint8_t o) { m_opacity = o; }
+    bool visible() const { return m_visible; }
+    void setVisible(bool v) { m_visible = v; }
 
-	BlendMode blendMode() const { return m_blendMode; }
-	void setBlendMode(BlendMode m) { m_blendMode = m; }
+    uint8_t opacity() const { return m_opacity; }
+    void setOpacity(uint8_t o) { m_opacity = o; }
+
+    BlendMode blendMode() const { return m_blendMode; }
+    void setBlendMode(BlendMode m) { m_blendMode = m; }
+    
+    void eraseFrame(int frameIndex);
 
 private:
-	std::string m_name;
-	bool m_visible = true;
-	uint8_t m_opacity = 255;
-	BlendMode m_blendMode = BlendMode::Normal;
+    std::string m_name;
+    bool m_visible = true;
+    uint8_t m_opacity = 255;
+    BlendMode m_blendMode = BlendMode::Normal;
 
-	std::vector<Cel*> m_cels;
+    std::vector<std::unique_ptr<Cel>> m_cels;
 };

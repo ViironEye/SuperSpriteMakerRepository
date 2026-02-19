@@ -1,8 +1,6 @@
 #pragma once
-#pragma once
 #include <memory>
 #include <cstdint>
-
 #include "../model/Sprite.h"
 #include "../model/Frame.h"
 #include "../tool/UndoStack.h"
@@ -35,7 +33,7 @@ public:
 
     void setActiveFrameIndex(int i) { m_activeFrame = i; }
     int  activeFrameIndex() const { return m_activeFrame; }
-    Frame* activeFrame() const { return m_sprite ? m_sprite->getFrame(m_activeFrame) : nullptr; }
+    //Frame* activeFrame() const { return m_sprite ? m_sprite->getFrame(m_activeFrame) : nullptr; }
 
     void setTool(Tool* tool) 
     { 
@@ -75,6 +73,32 @@ public:
     void setMoveModeDefault(MoveMode m) { m_moveMode = m; }
     MoveMode moveModeDefault() const { return m_moveMode; }
 
+    Sprite* sprite() { return m_sprite; }
+    const Sprite* sprite() const { return m_sprite; }
+
+    void setActiveLayerIndex(int i) { m_activeLayer = i; }
+    int  activeLayerIndex() const { return m_activeLayer; }
+    Layer* activeLayer() const { return m_sprite ? m_sprite->getLayer(m_activeLayer) : nullptr; }
+
+    const PixelBuffer& compositeFrame();
+    const PixelBuffer& compositePixels();
+
+    Cel* activeCel() const
+    {
+        if (!m_sprite) return nullptr;
+        Layer* L = activeLayer();
+        if (!L) return nullptr;
+        return L->getCel(m_activeFrame);
+    }
+
+    Frame* activeCelFrame() const
+    {
+        Cel* c = activeCel();
+        return c ? c->frame() : nullptr;
+    }
+
+    void clampActiveIndices();
+
 private:
     SelectionOp selectionOpFromMods(const Modifiers& mods) const;
 
@@ -99,4 +123,7 @@ private:
     int m_moveStartY = 0;
 
     int m_phase = 0;
+    int m_activeLayer = 0;
+
+    PixelBuffer m_composite{ 1,1,PixelFormat::RGBA8 };
 };

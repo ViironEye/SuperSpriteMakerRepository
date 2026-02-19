@@ -361,7 +361,7 @@ void EditorUI::draw()
 
     // ---------- Viewport ----------
     ImGuiWindowFlags canvasFlags =
-        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        ImGuiWindowFlags_NoScrollbar;// | ImGuiWindowFlags_NoScrollWithMouse;
 
     ImVec2 canvasSize = ImGui::GetContentRegionAvail();
     if (canvasSize.x < 1) canvasSize.x = 1;
@@ -444,8 +444,9 @@ void EditorUI::draw()
         if (ImGui::IsKeyPressed(ImGuiKey_Enter))  m_editor->keyEnter();
     }
 
-    Frame* f = m_editor->activeFrame();
-    if (f)
+    const PixelBuffer& pb = m_editor->compositePixels();
+
+    if (&pb != nullptr)
     {
         m_presentOpt.flipY = false;
         m_presentOpt.checkerboard = true;
@@ -453,7 +454,7 @@ void EditorUI::draw()
         m_presentOpt.gridMinZoom = 8;
         m_presentOpt.outline = true;
 
-        m_presenter.present(f->pixels(), m_vp, m_presentOpt);
+        m_presenter.present(pb, m_vp, m_presentOpt);
 
         // preview раст€гивани€ пр€моугольного выделени€
         if (m_editor->mode() == EditorMode::SelectRect)
@@ -479,6 +480,51 @@ void EditorUI::draw()
                 Tool* t = m_editor->tool();
                 if (auto* brush = dynamic_cast<BrushTool*>(t))
                     BrushOverlay::drawBrushCircle(m_vp, cx, cy, brush->settings(), 1.0f, true);
+            }
+        }
+
+        Sprite* spr = m_editor->sprite();
+        if (spr)
+        {
+            if (ImGui::Button("+ New Layer"))
+            {
+                int n = spr->layerCount() + 1;
+                spr->createLayer("Layer " + std::to_string(n));
+                m_editor->setActiveLayerIndex(spr->layerCount() - 1);
+            }
+
+            ImGui::Separator();
+
+            for (int i = spr->layerCount() - 1; i >= 0; --i)
+            {
+                Layer* L = spr->getLayer(i);
+                if (!L) continue;
+
+                ImGui::PushID(i);
+
+                bool selected = (m_editor->activeLayerIndex() == i);
+
+                bool vis = L->visible();
+                if (ImGui::Checkbox("##vis", &vis))
+                    L->setVisible(vis);
+
+                ImGui::SameLine();
+
+                if (ImGui::Selectable(L->name().c_str(), selected))
+                    m_editor->setActiveLayerIndex(i);
+
+                if (selected)
+                {
+                    int opPct = (int)std::lround(L->opacity() * 100.0f / 255.0f);
+                    if (ImGui::SliderInt("Opacity", &opPct, 0, 100))
+                    {
+                        int o = (opPct * 255) / 100;
+                        if (o < 0) o = 0; if (o > 255) o = 255;
+                        L->setOpacity((uint8_t)o);
+                    }
+                }
+
+                ImGui::PopID();
             }
         }
 

@@ -1,59 +1,41 @@
 #include "Layer.h"
+#include "Cel.h"
 
-Layer::Layer(const std::string& name) : m_name(name) { }
-
-void Layer::addCel(int frameIndex, Cel* cel)
+void Layer::ensureFrameCount(int frames)
 {
-	if (frameIndex < 0) return;
-
-	if (frameIndex >= (int)m_cels.size())
-	{
-		m_cels.resize(frameIndex + 1, nullptr);
-	}
-
-	m_cels[frameIndex] = cel;
+    if (frames < 0) frames = 0;
+    if ((int)m_cels.size() < frames)
+        m_cels.resize((size_t)frames);
 }
 
 Cel* Layer::getCel(int frameIndex)
 {
-	if (frameIndex < 0 || frameIndex >= (int)m_cels.size())
-	{
-		return nullptr;
-	}
-	return m_cels[frameIndex];
+    if (frameIndex < 0 || frameIndex >= (int)m_cels.size()) return nullptr;
+    return m_cels[(size_t)frameIndex].get();
 }
 
 const Cel* Layer::getCel(int frameIndex) const
 {
-	if (frameIndex < 0 || frameIndex >= (int)m_cels.size())
-	{
-		return nullptr;
-	}
-	return m_cels[frameIndex];
+    if (frameIndex < 0 || frameIndex >= (int)m_cels.size()) return nullptr;
+    return m_cels[(size_t)frameIndex].get();
 }
 
-void Layer::setCel(int frameIndex, Cel* cel)
+void Layer::setCel(int frameIndex, std::unique_ptr<Cel> cel)
 {
-	if (frameIndex < 0)
-	{
-		return;
-	}
-
-	if (frameIndex >= (int)m_cels.size())
-	{
-		m_cels.resize(frameIndex + 1);
-	}
-
-	m_cels[frameIndex] = std::move(cel);
+    if (frameIndex < 0) return;
+    ensureFrameCount(frameIndex + 1);
+    m_cels[(size_t)frameIndex] = std::move(cel);
 }
 
 void Layer::deleteCel(int frameIndex)
 {
-	if (frameIndex < 0 || frameIndex >= (int)m_cels.size())
-	{
-		return;
-	}
+    if (frameIndex < 0 || frameIndex >= (int)m_cels.size()) return;
+    m_cels[(size_t)frameIndex].reset();
+}
 
-	delete m_cels[frameIndex];
-	m_cels[frameIndex] = nullptr;
+void Layer::eraseFrame(int frameIndex)
+{
+    if (frameIndex < 0 || frameIndex >= (int)m_cels.size())
+        return;
+    m_cels.erase(m_cels.begin() + frameIndex);
 }

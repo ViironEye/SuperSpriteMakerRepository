@@ -1,34 +1,38 @@
 #pragma once
-#include "Frame.h"
 #include "Layer.h"
-#include <vector>
-#include <memory>
+
+struct TimelineFrame
+{
+    int durationMs = 100;
+};
 
 class Sprite {
 public:
-	Sprite(int width, int height, PixelFormat fmt);
+    Sprite(int width, int height, PixelFormat fmt);
 
-	Frame* createFrame(int durationMs = 100);
-	Frame* getFrame(int index);
-	bool removeFrame(int index);
-	int frameCount() const { return (int)m_frames.size(); }
+    int width() const { return m_width; }
+    int height() const { return m_height; }
+    PixelFormat format() const { return m_format; }
 
-	void pruneUnusedFrames();
+    int frameCount() const { return (int)m_frames.size(); }
+    int layerCount() const { return (int)m_layers.size(); }
 
-	Layer* createLayer(const std::string& name);
-	Layer* getLayer(int index);
-	bool removeLayer(int index);
-	int layerCount() const { return (int)m_layers.size(); }
+    TimelineFrame& frameInfo(int i) { return m_frames[i]; }
+    const TimelineFrame& frameInfo(int i) const { return m_frames[i]; }
 
-	int width() const { return m_width; }
-	int height() const { return m_height; }
-	PixelFormat format() const { return m_format; }
+    int createFrame(int durationMs);
+    bool removeFrame(int index);
+
+    Layer* createLayer(const std::string& name);
+    bool removeLayer(int index);
+
+    Layer* getLayer(int index);
+    const Layer* getLayer(int index) const;
 
 private:
-	int m_width;
-	int m_height;
-	PixelFormat m_format;
+    int m_width, m_height;
+    PixelFormat m_format;
 
-	std::vector<std::unique_ptr<Frame>> m_frames;
-	std::vector<std::unique_ptr<Layer>> m_layers;
+    std::vector<TimelineFrame> m_frames;
+    std::vector<std::unique_ptr<Layer>> m_layers;
 };

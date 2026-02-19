@@ -252,14 +252,16 @@ void App::createDocument(int w, int h)
 {
     m_sprite = std::make_unique<Sprite>(w, h, PixelFormat::RGBA8);
 
-    Frame* f0 = m_sprite->createFrame(100);
-    (void)f0;
+    // 1) минимум 1 кадр таймлайна
+    m_sprite->createFrame(100); // возвращает индекс, но он нам не нужен
 
-    Layer* l0 = m_sprite->createLayer("Layer 1");
+    // 2) минимум 1 слой (создаст cel'ы для всех кадров)
+    m_sprite->createLayer("Layer 1");
 
-    l0->addCel(0, new Cel(m_sprite->getFrame(0)));
+    // 3) editor/ui
     m_editor = std::make_unique<SpriteEditor>(m_sprite.get());
     m_editor->setActiveFrameIndex(0);
+    m_editor->setActiveLayerIndex(0); // <-- новый индекс слоя
 
     m_ui = std::make_unique<EditorUI>(m_editor.get());
 

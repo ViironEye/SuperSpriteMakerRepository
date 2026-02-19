@@ -6,10 +6,69 @@ SelectionOp SpriteEditor::selectionOpFromMods(const Modifiers& mods) const
     if (mods.shift) return SelectionOp::Add;
     return SelectionOp::Replace;
 }
+static inline uint8_t mul255(uint8_t a, uint8_t b)
+{
+    return (uint8_t)((int(a) * int(b) + 127) / 255);
+}
+
+static void blendOver(PixelBuffer& dst, const PixelBuffer& src, int dx, int dy, uint8_t layerOpacity)
+{
+    // предполагаем RGBA8
+    for (int y = 0; y < src.height(); ++y)
+    {
+        int ty = dy + y;
+        if (ty < 0 || ty >= dst.height()) continue;
+
+        for (int x = 0; x < src.width(); ++x)
+        {
+            int tx = dx + x;
+            if (tx < 0 || tx >= dst.width()) continue;
+
+            PixelRGBA8 s = src.getPixel(x, y);
+            if (s.a == 0) continue;
+
+            // умножаем альфу источника на opacity слоя
+            uint8_t Sa = mul255(s.a, layerOpacity);
+            if (Sa == 0) continue;
+
+            PixelRGBA8 d = dst.getPixel(tx, ty);
+
+            // out = s over d
+            // a_out = Sa + Da*(1-Sa)
+            // rgb_out = (s.rgb*Sa + d.rgb*Da*(1-Sa)) / a_out
+            float sa = Sa / 255.0f;
+            float da = d.a / 255.0f;
+
+            float outA = sa + da * (1.0f - sa);
+            if (outA <= 0.0f) {
+                dst.setPixel(tx, ty, PixelRGBA8(0, 0, 0, 0));
+                continue;
+            }
+
+            auto blendChan = [&](uint8_t sc, uint8_t dc) -> uint8_t
+                {
+                    float sr = sc / 255.0f;
+                    float dr = dc / 255.0f;
+                    float out = (sr * sa + dr * da * (1.0f - sa)) / outA;
+                    int v = (int)std::lround(out * 255.0f);
+                    if (v < 0) v = 0; if (v > 255) v = 255;
+                    return (uint8_t)v;
+                };
+
+            PixelRGBA8 out;
+            out.r = blendChan(s.r, d.r);
+            out.g = blendChan(s.g, d.g);
+            out.b = blendChan(s.b, d.b);
+            out.a = (uint8_t)std::lround(outA * 255.0f);
+
+            dst.setPixel(tx, ty, out);
+        }
+    }
+}
 
 void SpriteEditor::pointerDown(int x, int y, float pressure, const Modifiers& mods)
 {
-    Frame* frame = activeFrame();
+    Frame* frame = activeCelFrame();
     if (!frame) return;
 
     if (m_mode == EditorMode::Draw)
@@ -123,4 +182,74 @@ void SpriteEditor::keyEnter()
     auto cmd = m_moveSession.commit();
     if (cmd)
         m_undo.push(std::move(cmd));
+}
+
+const PixelBuffer& SpriteEditor::compositeFrame()
+{
+    Frame* baseFrame = activeCelFrame();
+    if (!baseFrame) return m_composite;
+
+    if (m_composite.width() != m_sprite->width() || m_composite.height() != m_sprite->height())
+        m_composite = PixelBuffer(m_sprite->width(), m_sprite->height(), PixelFormat::RGBA8);
+
+    m_composite.clear(PixelRGBA8(0, 0, 0, 0));
+
+    int fi = m_activeFrame;
+
+    for (int li = 0; li < m_sprite->layerCount(); ++li)
+    {
+        Layer* L = m_sprite->getLayer(li);
+        if (!L || !L->visible()) continue;
+
+        Cel* cel = L->getCel(fi);
+        if (!cel || !cel->frame()) continue;
+
+        const PixelBuffer& src = cel->frame()->pixels();
+        uint8_t layerOpacity = L->opacity();
+
+        blendOver(m_composite, src, cel->x(), cel->y(), layerOpacity);
+    }
+
+    return m_composite;
+}
+
+const PixelBuffer& SpriteEditor::compositePixels()
+{
+    if (!m_sprite) return m_composite;
+
+    int W = m_sprite->width();
+    int H = m_sprite->height();
+
+    if (m_composite.width() != W || m_composite.height() != H)
+        m_composite = PixelBuffer(W, H, PixelFormat::RGBA8);
+
+    m_composite.clear(PixelRGBA8(0, 0, 0, 0));
+
+    for (int li = 0; li < m_sprite->layerCount(); ++li)
+    {
+        Layer* L = m_sprite->getLayer(li);
+        if (!L || !L->visible()) continue;
+
+        Cel* c = L->getCel(m_activeFrame);
+        if (!c) continue;
+
+        // Normal blend + layer opacity:
+        // нужно написать blendOver() (ниже)
+        blendOver(m_composite, c->pixels(), c->x(), c->y(), L->opacity());
+    }
+
+    return m_composite;
+}
+
+void SpriteEditor::clampActiveIndices()
+{
+    if (!m_sprite) return;
+
+    if (m_activeFrame < 0) m_activeFrame = 0;
+    if (m_activeFrame >= m_sprite->frameCount())
+        m_activeFrame = std::max(0, m_sprite->frameCount() - 1);
+
+    if (m_activeLayer < 0) m_activeLayer = 0;
+    if (m_activeLayer >= m_sprite->layerCount())
+        m_activeLayer = std::max(0, m_sprite->layerCount() - 1);
 }
