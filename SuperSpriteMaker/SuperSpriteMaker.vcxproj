@@ -160,6 +160,7 @@
     <ClCompile Include="src\tool\InlTool.cpp" />
     <ClCompile Include="src\tool\Pencil.cpp" />
     <ClCompile Include="src\application\SpriteEditor.cpp" />
+    <ClCompile Include="src\tool\SelectionOverlay.cpp" />
     <ClCompile Include="src\tool\SelectionOverlayUI.cpp" />
     <ClCompile Include="src\tool\ShapeOverlay.cpp" />
     <ClCompile Include="src\tool\ShapeTool.cpp" />

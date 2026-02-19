@@ -37,8 +37,19 @@ public:
     int  activeFrameIndex() const { return m_activeFrame; }
     Frame* activeFrame() const { return m_sprite ? m_sprite->getFrame(m_activeFrame) : nullptr; }
 
-    void setTool(Tool* tool) { m_tool = tool; }
+    void setTool(Tool* tool) 
+    { 
+        m_tool = tool;
+        if (m_mode == EditorMode::MoveSelect && m_moveSession.active() && m_mode != EditorMode::MoveSelect)
+        {
+            m_moveSession.cancel();
+            m_draggingMove = false;
+        }
+    }
     Tool* tool() const { return m_tool; }
+
+    RectSelectTool& rectSelectTool() { return m_rectSelect; }
+    const RectSelectTool& rectSelectTool() const { return m_rectSelect; }
 
     void setMode(EditorMode m) { m_mode = m; }
     EditorMode mode() const { return m_mode; }
@@ -61,10 +72,12 @@ public:
     SelectionMoveSession& moveSession() { return m_moveSession; }
     const SelectionMoveSession& moveSession() const { return m_moveSession; }
 
+    void setMoveModeDefault(MoveMode m) { m_moveMode = m; }
+    MoveMode moveModeDefault() const { return m_moveMode; }
+
 private:
     SelectionOp selectionOpFromMods(const Modifiers& mods) const;
 
-private:
     Sprite* m_sprite = nullptr;
     int m_activeFrame = 0;
 
@@ -80,6 +93,7 @@ private:
     RectSelectTool m_rectSelect;
 
     SelectionMoveSession m_moveSession;
+    MoveMode m_moveMode = MoveMode::Cut;
     bool m_draggingMove = false;
     int m_moveStartX = 0;
     int m_moveStartY = 0;

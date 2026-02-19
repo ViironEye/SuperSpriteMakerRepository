@@ -34,7 +34,9 @@ void SpriteEditor::pointerDown(int x, int y, float pressure, const Modifiers& mo
     {
         if (!m_moveSession.active())
         {
-            MoveMode mm = mods.alt ? MoveMode::Copy : MoveMode::Cut;
+            MoveMode mm = m_moveMode;
+            if (mods.alt) mm = MoveMode::Copy;
+
             if (!m_moveSession.begin(frame, m_selection, mm))
                 return;
         }

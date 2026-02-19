@@ -3,6 +3,8 @@
 #include "../tool/Brush.h"
 #include "../tool/SelectionOverlayUI.h"
 #include "../tool/ShapeOverlay.h"
+#include "../tool/SelectionOverlay.h"
+#include "../tool/RectSelectTool.h"
 #include "../structs/ShapeSettings.h"
 #include <iostream>
 
@@ -145,6 +147,14 @@ void EditorUI::draw()
         m_paramsPanel = ToolParamsPanel::Eraser;
         break;
 
+    case 4:
+        m_editor->setMode(EditorMode::SelectRect);
+        break;
+
+    case 5:
+        m_editor->setMode(EditorMode::MoveSelect);
+        break;
+
     case 6:
         m_editor->setMode(EditorMode::Draw);
         m_shapeTool.setColor(currentColor);
@@ -152,6 +162,29 @@ void EditorUI::draw()
         m_editor->setTool(&m_shapeTool);
         m_paramsPanel = ToolParamsPanel::Shape;
         break;
+    }
+
+    if (m_toolIndex == 5)
+    {
+        ImGui::TextUnformatted("Move");
+        ImGui::Separator();
+
+        MoveMode mm = m_editor->moveModeDefault();
+        int mode = (mm == MoveMode::Cut) ? 0 : 1;
+
+        const bool moving = m_editor->moveSession().active();
+        if (moving)
+            ImGui::BeginDisabled();
+
+        if (ImGui::RadioButton("Cut", mode == 0)) mode = 0;
+        if (ImGui::RadioButton("Copy", mode == 1)) mode = 1;
+
+        if (moving)
+            ImGui::EndDisabled();
+
+        m_editor->setMoveModeDefault(mode == 0 ? MoveMode::Cut : MoveMode::Copy);
+
+        ImGui::TextUnformatted("Tip: hold Alt to Copy (temporary).");
     }
 
     if (shapeClicked)
@@ -421,6 +454,22 @@ void EditorUI::draw()
         m_presentOpt.outline = true;
 
         m_presenter.present(f->pixels(), m_vp, m_presentOpt);
+
+        // preview раст€гивани€ пр€моугольного выделени€
+        if (m_editor->mode() == EditorMode::SelectRect)
+        {
+            const RectSelectTool& rs = m_editor->rectSelectTool(); // нужен геттер (см. ниже)
+            if (rs.active())
+            {
+                SelectionOverlay::drawRubberBand(
+                    m_vp,
+                    rs.ax(), rs.ay(),
+                    rs.bx(), rs.by(),
+                    rs.op()
+                );
+            }
+        }
+
 
         if (hovered)
         {

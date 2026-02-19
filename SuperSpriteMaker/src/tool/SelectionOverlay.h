@@ -2,6 +2,7 @@
 #pragma once
 #include "SelectionMask.h"
 #include "../model/PixelBuffer.h"
+#include "../application/Viewport.h"
 #include <cstdint>
 
 struct SelectionOverlay {
@@ -33,4 +34,7 @@ struct SelectionOverlay {
             }
         }
     }
+    static void drawRubberBand(const Viewport& vp,
+        int ax, int ay, int bx, int by,
+        SelectionOp op);
 };

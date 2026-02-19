@@ -102,6 +102,9 @@
     <ClCompile Include="src\tool\ShapeOverlay.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="src\tool\SelectionOverlay.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\model\PixelBuffer.h">

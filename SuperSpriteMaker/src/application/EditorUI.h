@@ -8,6 +8,8 @@
 #include "../tool/Brush.h"
 #include "../tool/InkTool.h"
 #include "../tool/ShapeTool.h"
+#include "../tool/RectSelectTool.h"
+#include "../tool/SelectionMoveSession.h"
 
 enum class ToolParamsPanel
 {
@@ -41,6 +43,9 @@ private:
 
     ShapeSettings m_shapeSettings;
     ShapeTool m_shapeTool{ m_shapeSettings };
+
+    RectSelectTool m_selectTool;
+    SelectionMoveSession m_moveTool;
 
     int m_toolIndex = 0;
     float m_color[4] = { 0.f, 0.f, 0.f, 0.f };
