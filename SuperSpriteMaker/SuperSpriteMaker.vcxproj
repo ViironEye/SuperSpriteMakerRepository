@@ -161,6 +161,8 @@
     <ClCompile Include="src\tool\BlendModes.cpp" />
     <ClCompile Include="src\tool\Brush.cpp" />
     <ClCompile Include="src\tool\BrushOverlay.cpp" />
+    <ClCompile Include="src\tool\Eyedropper.cpp" />
+    <ClCompile Include="src\tool\FillTool.cpp" />
     <ClCompile Include="src\tool\InlTool.cpp" />
     <ClCompile Include="src\tool\Pencil.cpp" />
     <ClCompile Include="src\application\SpriteEditor.cpp" />
@@ -208,6 +210,8 @@
     <ClInclude Include="src\tool\Brush.h" />
     <ClInclude Include="src\tool\BrushOverlay.h" />
     <ClInclude Include="src\tool\Command.h" />
+    <ClInclude Include="src\tool\Eyedropper.h" />
+    <ClInclude Include="src\tool\FillTool.h" />
     <ClInclude Include="src\tool\InkTool.h" />
     <ClInclude Include="src\tool\Pencil.h" />
     <ClInclude Include="src\tool\SelectionMask.h" />

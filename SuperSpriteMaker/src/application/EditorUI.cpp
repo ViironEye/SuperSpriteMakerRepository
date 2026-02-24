@@ -152,7 +152,7 @@ void EditorUI::draw()
     const char* toolTips[] = {
     "Pencil (P)", "Ink (I)", "Brush (B)",
     "Eraser (E)", "Select (M)", "Move (V)",
-    "Shapes (U)"
+    "Shapes (U)", "Fill (F)", "Eyedropper (A)"
     };
 
     bool shapeClicked = false;
@@ -195,6 +195,8 @@ void EditorUI::draw()
                 if (idx == 1) m_paramsPanel = ToolParamsPanel::Ink;
                 if (idx == 2) m_paramsPanel = ToolParamsPanel::Brush;
                 if (idx == 3) m_paramsPanel = ToolParamsPanel::Eraser;
+                if (idx == 6) m_paramsPanel = ToolParamsPanel::Shape;
+                if (idx == 7) m_paramsPanel = ToolParamsPanel::Fill;
             }
 
             // Левый клик: выбрать инструмент; если уже выбран — открыть параметры
@@ -210,6 +212,8 @@ void EditorUI::draw()
                     if (idx == 1) m_paramsPanel = ToolParamsPanel::Ink;
                     if (idx == 2) m_paramsPanel = ToolParamsPanel::Brush;
                     if (idx == 3) m_paramsPanel = ToolParamsPanel::Eraser;
+                    if (idx == 6) m_paramsPanel = ToolParamsPanel::Shape;
+                    if (idx == 7) m_paramsPanel = ToolParamsPanel::Fill;
                 }
             }
 
@@ -221,7 +225,7 @@ void EditorUI::draw()
     ImGui::BeginChild("ToolsArea", ImVec2(160.f, 140.f), true, ImGuiWindowFlags_NoScrollbar);
     iconBtn(0, "Pencil"); ImGui::SameLine(); iconBtn(1, "Ink"); ImGui::SameLine(); iconBtn(2, "Brush");
     iconBtn(3, "Eraser"); ImGui::SameLine(); iconBtn(4, "Select"); ImGui::SameLine(); iconBtn(5, "Move");
-    iconBtn(6, "Shapes");
+    iconBtn(6, "Shapes"); ImGui::SameLine(); iconBtn(7, "Fill"); ImGui::SameLine(); iconBtn(8, "Eyedropper");
 
     PixelRGBA8 currentColor = toPixel(m_color);
 
@@ -270,6 +274,18 @@ void EditorUI::draw()
         m_shapeTool.setSettings(m_shapeSettings);
         m_editor->setTool(&m_shapeTool);
         m_paramsPanel = ToolParamsPanel::Shape;
+        break;
+
+    case 7:
+        m_editor->setMode(EditorMode::Draw);
+        m_fillTool.setColor(currentColor);
+        m_editor->setTool(&m_fillTool);
+        m_paramsPanel = ToolParamsPanel::Fill;
+        break;
+    case 8:
+        m_editor->setMode(EditorMode::Draw);
+        m_editor->setTool(&m_dropper);
+        m_paramsPanel = ToolParamsPanel::Eyedropper;
         break;
     }
 
@@ -335,6 +351,12 @@ void EditorUI::draw()
     ImGui::EndChild();
 
     //Colors
+    PixelRGBA8 pc = m_editor->primaryColor();
+    m_color[0] = pc.r / 255.0f;
+    m_color[1] = pc.g / 255.0f;
+    m_color[2] = pc.b / 255.0f;
+    m_color[3] = pc.a / 255.0f;
+
     ImGui::SameLine();
     ImGui::BeginChild("ColorArea", ImVec2(0.f, 140.f), true, ImGuiWindowFlags_NoScrollbar);
     if (ImGui::ColorButton("FG",
@@ -352,6 +374,9 @@ void EditorUI::draw()
             ImGuiColorEditFlags_AlphaBar);
         ImGui::EndPopup();
     }
+
+    PixelRGBA8 newC = toPixel(m_color);
+    m_editor->setPrimaryColor(newC);
 
     ImGui::Separator();
     ImGui::TextUnformatted("Tool Properties");
@@ -390,12 +415,12 @@ void EditorUI::draw()
     }
     case ToolParamsPanel::Eraser:
     {
-        BrushSettings& s = m_brush.settings(); // eraser = тот же brush settings
+        BrushSettings& s = m_brush.settings();
 
         ImGui::TextUnformatted("Eraser");
         ImGui::SliderFloat("Radius", &s.radius, 1.0f, 128.0f, "%.1f");
         ImGui::SliderFloat("Spacing", &s.spacing, 0.01f, 1.0f, "%.2f");
-        ImGui::SliderFloat("Opacity", &s.opacity, 0.0f, 1.0f, "%.2f");   // сила стирания
+        ImGui::SliderFloat("Opacity", &s.opacity, 0.0f, 1.0f, "%.2f");
         ImGui::SliderFloat("Hardness", &s.hardness, 0.0f, 1.0f, "%.2f");
         ImGui::Checkbox("Size Pressure", &s.sizePressure);
         ImGui::Checkbox("Opacity Pressure", &s.opacityPressure);
@@ -454,6 +479,22 @@ void EditorUI::draw()
             ImGui::EndPopup();
         }
 
+        break;
+    }
+    case ToolParamsPanel::Fill:
+    {
+        FillSettings& s = m_fillTool.settings();
+        ImGui::TextUnformatted("Fill");
+        ImGui::SliderInt("Tolerance", &s.tolerance, 0, 255);
+        ImGui::Checkbox("Contiguous", &s.contiguous);
+        ImGui::Checkbox("Include Alpha", &s.includeAlpha);
+        break;
+    }
+    case ToolParamsPanel::Eyedropper:
+    {
+        EyedropperSettings& d = m_dropper.settings();
+        ImGui::TextUnformatted("Eyedropper");
+        ImGui::Checkbox("Sample Merged", &d.sampleMerged);
         break;
     }
     default:

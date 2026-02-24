@@ -10,6 +10,8 @@
 #include "../tool/ShapeTool.h"
 #include "../tool/RectSelectTool.h"
 #include "../tool/SelectionMoveSession.h"
+#include "../tool/FillTool.h"
+#include "../tool/Eyedropper.h"
 
 enum class ToolParamsPanel
 {
@@ -17,7 +19,9 @@ enum class ToolParamsPanel
     Ink,
     Brush,
     Eraser,
-    Shape
+    Shape,
+    Fill,
+    Eyedropper
 };
 
 class EditorUI
@@ -46,6 +50,9 @@ private:
 
     RectSelectTool m_selectTool;
     SelectionMoveSession m_moveTool;
+
+    FillTool m_fillTool;
+    EyedropperTool m_dropper{ m_editor };
 
     int m_toolIndex = 0;
     float m_color[4] = { 0.f, 0.f, 0.f, 0.f };

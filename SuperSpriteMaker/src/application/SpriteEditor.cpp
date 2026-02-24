@@ -106,6 +106,51 @@ void SpriteEditor::pointerDown(int x, int y, float pressure, const Modifiers& mo
         m_moveSession.setOffset(0, 0);
         return;
     }
+
+    if (m_mode == EditorMode::Draw)
+    {
+        if (!m_tool) return;
+
+        Frame* frame = activeCelFrame();
+        if (!frame) return;
+
+        if (auto* fill = dynamic_cast<FillTool*>(m_tool))
+        {
+            auto cmd = std::make_unique<StrokeCommand>(frame);
+            fill->apply(frame, cmd.get(), x, y, pressure);
+            m_undo.push(std::move(cmd));
+            return;
+        }
+
+        m_strokeCmd = std::make_unique<StrokeCommand>(frame);
+        m_stroke = std::make_unique<Stroke>(m_tool, frame, m_strokeCmd.get());
+        m_stroke->begin(x, y, pressure);
+        return;
+    }
+
+    if (m_mode == EditorMode::Draw)
+    {
+        if (!m_tool) return;
+
+        Frame* frame = activeCelFrame();
+        if (!frame) return;
+
+        // Eyedropper: один клик
+        if (dynamic_cast<EyedropperTool*>(m_tool))
+        {
+            m_tool->apply(frame, nullptr, x, y, pressure);
+            return;
+        }
+
+        // Fill: как раньше
+        if (auto* fill = dynamic_cast<FillTool*>(m_tool))
+        {
+            auto cmd = std::make_unique<StrokeCommand>(frame);
+            fill->apply(frame, cmd.get(), x, y, pressure);
+            m_undo.push(std::move(cmd));
+            return;
+        }
+    }
 }
 
 void SpriteEditor::pointerMove(int x, int y, float pressure, const Modifiers& mods)

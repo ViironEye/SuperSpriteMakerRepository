@@ -9,6 +9,8 @@
 #include "../tool/SelectionMoveSession.h"
 #include "../tool/RectSelectTool.h"
 #include "../tool/Tool.h"
+#include "../tool/FillTool.h"
+#include "../tool/Eyedropper.h"
 
 enum class EditorMode {
     Draw,
@@ -99,8 +101,13 @@ public:
 
     void clampActiveIndices();
 
+    void setPrimaryColor(const PixelRGBA8& c) { m_primaryColor = c; }
+    PixelRGBA8 primaryColor() const { return m_primaryColor; }
+
 private:
     SelectionOp selectionOpFromMods(const Modifiers& mods) const;
+
+    PixelRGBA8 m_primaryColor{ 0,0,0,255 };
 
     Sprite* m_sprite = nullptr;
     int m_activeFrame = 0;
