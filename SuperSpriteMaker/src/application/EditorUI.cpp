@@ -6,6 +6,10 @@
 #include "../tool/SelectionOverlay.h"
 #include "../tool/RectSelectTool.h"
 #include "../structs/ShapeSettings.h"
+#include "ImageImport.h"
+#include "FileDialog.h"
+#include "Utf.h"
+#include "ImageWriter.h"
 #include <iostream>
 
 static Modifiers modsFromImGui()
@@ -33,6 +37,111 @@ void EditorUI::draw()
     if (!m_editor) return;
 
     ImGui::Begin("Tools");
+
+    static char s_path[260] = "export.png";
+    static bool s_openExport = false;
+
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Export PNG..."))
+            {
+                std::wstring wpath;
+                if (FileDialog::savePNG(wpath))
+                {
+                    const PixelBuffer& pb = m_editor->compositePixels();
+                    ImageWriter::savePNG(wideToUtf8(wpath), pb, /*flipY*/true);
+                }
+            }
+
+            if (ImGui::MenuItem("Export JPEG..."))
+            {
+                std::wstring wpath;
+                if (FileDialog::saveJPG(wpath))
+                {
+                    const PixelBuffer& pb = m_editor->compositePixels();
+                    ImageWriter::saveJPG(wideToUtf8(wpath), pb, /*quality*/90, /*flipY*/true);
+                }
+            }
+
+            if (ImGui::MenuItem("Import Image as Layer..."))
+            {
+                std::wstring wpath;
+                if (FileDialog::openImage(wpath))
+                {
+                    std::string path = wideToUtf8(wpath);
+
+                    // nearest=true (pixel art)
+                    ImageImport::importAsNewLayer(*m_editor, path, true);
+                }
+            }
+
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+    if (s_openExport)
+        ImGui::OpenPopup("Export Image");
+
+    if (ImGui::BeginPopupModal("Export Image", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::InputText("Path", s_path, IM_ARRAYSIZE(s_path));
+
+        // простая логика выбора формата по расширению
+        bool isPNG = false, isJPG = false;
+        {
+            std::string p = s_path;
+            auto lower = [](char c) { return (c >= 'A' && c <= 'Z') ? (char)(c + 32) : c; };
+            for (auto& c : p) c = lower(c);
+            isPNG = (p.size() >= 4 && p.substr(p.size() - 4) == ".png");
+            isJPG = (p.size() >= 4 && (p.substr(p.size() - 4) == ".jpg" || p.substr(p.size() - 5) == ".jpeg"));
+        }
+
+        static int jpgQuality = 90;
+        if (isJPG)
+            ImGui::SliderInt("JPEG Quality", &jpgQuality, 1, 100);
+
+        static bool flipY = true;
+        ImGui::Checkbox("Flip Y", &flipY);
+
+        if (ImGui::Button("Save", ImVec2(120, 0)))
+        {
+            const PixelBuffer& pb = m_editor->compositePixels();
+            bool ok = false;
+
+            if (isPNG)
+                ok = ImageWriter::savePNG(s_path, pb, flipY);
+            else if (isJPG)
+                ok = ImageWriter::saveJPG(s_path, pb, jpgQuality, flipY);
+
+            // Можно вывести статус
+            if (!ok)
+                ImGui::OpenPopup("Export Failed");
+            else
+                ImGui::CloseCurrentPopup();
+
+            s_openExport = false;
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
+        {
+            s_openExport = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (ImGui::BeginPopupModal("Export Failed", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::TextUnformatted("Failed to export image.\nCheck path/format (use .png/.jpg/.jpeg).");
+            if (ImGui::Button("OK")) ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+        }
+
+        ImGui::EndPopup();
+    }
 
     if (!m_atlasReady)
         m_atlasReady = m_toolAtlas.create();
