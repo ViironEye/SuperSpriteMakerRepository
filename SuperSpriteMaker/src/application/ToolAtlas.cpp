@@ -1,4 +1,5 @@
 #include "ToolAtlas.h"
+#include "ImageLoader.h"
 #include <vector>
 #include <cstdint>
 #include <algorithm>
@@ -26,102 +27,84 @@ static void fillRect(std::vector<uint8_t>& img, int W, int H, int x, int y, int 
             setPx(img, W, H, x + xx, y + yy, c);
 }
 
+static inline void blendPx(std::vector<uint8_t>& img, int W, int H, int x, int y, RGBA src)
+{
+    if (x < 0 || y < 0 || x >= W || y >= H) return;
+    if (src.a == 0) return;
+
+    size_t i = (size_t(y) * W + x) * 4;
+
+    const int dr = img[i + 0];
+    const int dg = img[i + 1];
+    const int db = img[i + 2];
+
+    const int sa = src.a;
+    const int inv = 255 - sa;
+
+    img[i + 0] = (uint8_t)((src.r * sa + dr * inv) / 255);
+    img[i + 1] = (uint8_t)((src.g * sa + dg * inv) / 255);
+    img[i + 2] = (uint8_t)((src.b * sa + db * inv) / 255);
+    img[i + 3] = 255;
+}
+
+static void blitRGBA_Nearest(std::vector<uint8_t>& dst, int dstW, int dstH, int dx, int dy, int drawW, int drawH, 
+    const std::vector<uint8_t>& src, int srcW, int srcH)
+{
+    if (src.empty() || srcW <= 0 || srcH <= 0) return;
+
+    for (int y = 0; y < drawH; ++y)
+    {
+        int yy = dy + y;
+        if (yy < 0 || yy >= dstH) continue;
+
+        int sy = (y * srcH) / drawH;
+
+        for (int x = 0; x < drawW; ++x)
+        {
+            int xx = dx + x;
+            if (xx < 0 || xx >= dstW) continue;
+
+            int sx = (x * srcW) / drawW;
+
+            size_t si = (size_t(sy) * srcW + sx) * 4;
+            RGBA px{
+                src[si + 0],
+                src[si + 1],
+                src[si + 2],
+                src[si + 3]
+            };
+
+            blendPx(dst, dstW, dstH, xx, yy, px);
+        }
+    }
+}
+
+static void drawIconFromFileIntoCell(std::vector<uint8_t>& atlas, int W, int H, int cellX, int cellY, int cell,
+    const std::vector<uint8_t>& iconPx, int iconW, int iconH, int padding = 2)
+{
+    if (iconPx.empty() || iconW <= 0 || iconH <= 0) return;
+
+    int availW = cell - 2 * padding;
+    int availH = cell - 2 * padding;
+    if (availW <= 0 || availH <= 0) return;
+
+    float sx = float(availW) / float(iconW);
+    float sy = float(availH) / float(iconH);
+    float s = (sx < sy) ? sx : sy;
+
+    int drawW = std::max(1, int(std::round(iconW * s)));
+    int drawH = std::max(1, int(std::round(iconH * s)));
+
+    int dx = cellX + padding + (availW - drawW) / 2;
+    int dy = cellY + padding + (availH - drawH) / 2;
+
+    blitRGBA_Nearest(atlas, W, H, dx, dy, drawW, drawH, iconPx, iconW, iconH);
+}
+
 static void drawRect(std::vector<uint8_t>& img, int W, int H, int x, int y, int w, int h, RGBA c)
 {
     for (int i = 0; i < w; ++i) { setPx(img, W, H, x + i, y, c); setPx(img, W, H, x + i, y + h - 1, c); }
     for (int i = 0; i < h; ++i) { setPx(img, W, H, x, y + i, c); setPx(img, W, H, x + w - 1, y + i, c); }
-}
-
-static void drawLine(std::vector<uint8_t>& img, int W, int H, int x0, int y0, int x1, int y1, RGBA c)
-{
-    int dx = std::abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-    int dy = -std::abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-    int err = dx + dy;
-    while (true) {
-        setPx(img, W, H, x0, y0, c);
-        if (x0 == x1 && y0 == y1) break;
-        int e2 = 2 * err;
-        if (e2 >= dy) { err += dy; x0 += sx; }
-        if (e2 <= dx) { err += dx; y0 += sy; }
-    }
-}
-
-static void drawCircle(std::vector<uint8_t>& img, int W, int H, int cx, int cy, int r, RGBA c)
-{
-    int x = r, y = 0, err = 0;
-    while (x >= y) {
-        setPx(img, W, H, cx + x, cy + y, c); setPx(img, W, H, cx + y, cy + x, c);
-        setPx(img, W, H, cx - y, cy + x, c); setPx(img, W, H, cx - x, cy + y, c);
-        setPx(img, W, H, cx - x, cy - y, c); setPx(img, W, H, cx - y, cy - x, c);
-        setPx(img, W, H, cx + y, cy - x, c); setPx(img, W, H, cx + x, cy - y, c);
-        y++;
-        if (err <= 0) err += 2 * y + 1;
-        if (err > 0) { x--; err -= 2 * x + 1; }
-    }
-}
-
-static void drawIcon_Pencil(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    drawLine(img, W, H, ox + 6, oy + 24, ox + 24, oy + 6, fg);
-    drawLine(img, W, H, ox + 7, oy + 24, ox + 25, oy + 6, fg);
-    drawRect(img, W, H, ox + 5, oy + 23, 6, 6, fg); // “òåëî”
-}
-
-static void drawIcon_Ink(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    drawLine(img, W, H, ox + 16, oy + 6, ox + 8, oy + 18, fg);
-    drawLine(img, W, H, ox + 16, oy + 6, ox + 24, oy + 18, fg);
-    drawLine(img, W, H, ox + 8, oy + 18, ox + 16, oy + 26, fg);
-    drawLine(img, W, H, ox + 24, oy + 18, ox + 16, oy + 26, fg);
-    drawCircle(img, W, H, ox + 16, oy + 20, 2, fg);
-}
-
-static void drawIcon_Brush(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    drawCircle(img, W, H, ox + 16, oy + 16, 8, fg);
-    drawLine(img, W, H, ox + 16, oy + 24, ox + 16, oy + 28, fg);
-}
-
-static void drawIcon_Eraser(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    drawRect(img, W, H, ox + 8, oy + 10, 16, 12, fg);
-    drawLine(img, W, H, ox + 10, oy + 22, ox + 22, oy + 22, fg);
-}
-
-static void drawIcon_Select(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    for (int x = 8; x <= 24; x += 2) { setPx(img, W, H, ox + x, oy + 8, fg); setPx(img, W, H, ox + x, oy + 24, fg); }
-    for (int y = 8; y <= 24; y += 2) { setPx(img, W, H, ox + 8, oy + y, fg); setPx(img, W, H, ox + 24, oy + y, fg); }
-}
-
-static void drawIcon_Move(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    drawLine(img, W, H, ox + 16, oy + 8, ox + 16, oy + 24, fg);
-    drawLine(img, W, H, ox + 8, oy + 16, ox + 24, oy + 16, fg);
-    drawLine(img, W, H, ox + 16, oy + 8, ox + 14, oy + 10, fg);
-    drawLine(img, W, H, ox + 16, oy + 8, ox + 18, oy + 10, fg);
-
-    drawLine(img, W, H, ox + 16, oy + 24, ox + 14, oy + 22, fg);
-    drawLine(img, W, H, ox + 16, oy + 24, ox + 18, oy + 22, fg);
-
-    drawLine(img, W, H, ox + 8, oy + 16, ox + 10, oy + 14, fg);
-    drawLine(img, W, H, ox + 8, oy + 16, ox + 10, oy + 18, fg);
-
-    drawLine(img, W, H, ox + 24, oy + 16, ox + 22, oy + 14, fg);
-    drawLine(img, W, H, ox + 24, oy + 16, ox + 22, oy + 18, fg);
-}
-
-static void drawIcon_Shape(std::vector<uint8_t>& img, int W, int H, int ox, int oy)
-{
-    RGBA fg{ 240,240,240,255 };
-    drawRect(img, W, H, ox + 8, oy + 8, 16, 16, fg);
-    drawLine(img, W, H, ox + 10, oy + 22, ox + 22, oy + 10, fg);
 }
 
 ToolAtlas::~ToolAtlas()
@@ -135,7 +118,7 @@ ToolAtlas::~ToolAtlas()
 void ToolAtlas::getUV(int idx, float& u0, float& v0, float& u1, float& v1) const
 {
     const float cell = 32.0f;
-    const float W = cell * 7.0f;
+    const float W = cell * 9.0f;
     const float H = cell * 1.0f;
 
     float x0 = idx * cell;
@@ -150,7 +133,7 @@ void ToolAtlas::getUV(int idx, float& u0, float& v0, float& u1, float& v1) const
 bool ToolAtlas::create()
 {
     const int cell = 32;
-    const int cols = 7;
+    const int cols = 9;
     const int rows = 1;
     const int W = cell * cols;
     const int H = cell * rows;
@@ -163,16 +146,31 @@ bool ToolAtlas::create()
         drawRect(img, W, H, i * cell, 0, cell, cell, RGBA{ 20,20,20,255 });
     }
 
-    drawIcon_Pencil(img, W, H, 0 * cell, 0);
-    drawIcon_Ink(img, W, H, 1 * cell, 0);
-    drawIcon_Brush(img, W, H, 2 * cell, 0);
-    drawIcon_Eraser(img, W, H, 3 * cell, 0);
-    drawIcon_Select(img, W, H, 4 * cell, 0);
-    drawIcon_Move(img, W, H, 5 * cell, 0);
-    drawIcon_Shape(img, W, H, 6 * cell, 0);
+    const char* names[9] = {
+        "pencil.png",
+        "ink.png",
+        "brush.png",
+        "eraser.png",
+        "select.png",
+        "move.png",
+        "shape.png",
+        "fill.png",
+        "eyedropper.png"
+    };
 
-    if (!m_tex)
-        glGenTextures(1, &m_tex);
+    for (int i = 0; i < cols; ++i)
+    {
+        int iw = 0, ih = 0;
+        std::vector<uint8_t> px;
+
+        std::string p = ImageLoader::iconPath(names[i]);
+        ImageLoader::loadRGBA8FromFile(p, iw, ih, px);
+
+        drawIconFromFileIntoCell(img, W, H, i * cell, 0, cell, px, iw, ih, /*padding=*/2);
+        
+    }
+
+    if (!m_tex) glGenTextures(1, &m_tex);
 
     glBindTexture(GL_TEXTURE_2D, m_tex);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

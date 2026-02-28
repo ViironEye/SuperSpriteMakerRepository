@@ -27,9 +27,7 @@ enum class ToolParamsPanel
 class EditorUI
 {
 public:
-    EditorUI(SpriteEditor* editor)
-        : m_editor(editor) {
-    }
+    EditorUI(SpriteEditor* editor) : m_editor(editor) { }
 
     void draw();
     Viewport& viewport() { return m_vp; }

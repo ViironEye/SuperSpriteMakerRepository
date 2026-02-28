@@ -7,7 +7,6 @@
 
 namespace
 {
-    // ¬ажно: фильтр в WinAPI должен быть с '\0' разделител€ми и двойным '\0' в конце.
     constexpr const wchar_t* FILTER_PNG =
         L"PNG Image (*.png)\0*.png\0All Files (*.*)\0*.*\0\0";
 
@@ -30,7 +29,6 @@ namespace FileDialog
     {
         wchar_t fileBuf[MAX_PATH] = { 0 };
 
-        // initial filename
         if (initialFileName && initialFileName[0] != L'\0')
         {
             wcsncpy_s(fileBuf, initialFileName, _TRUNCATE);
@@ -38,22 +36,22 @@ namespace FileDialog
 
         OPENFILENAMEW ofn{};
         ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = nullptr; // можно передать HWND окна, но не об€зательно
+        ofn.hwndOwner = nullptr;
         ofn.lpstrFilter = filter;
         ofn.lpstrFile = fileBuf;
         ofn.nMaxFile = MAX_PATH;
-        ofn.lpstrDefExt = defaultExt; // например L"png"
+        ofn.lpstrDefExt = defaultExt;
         ofn.Flags =
             OFN_PATHMUSTEXIST |
             OFN_OVERWRITEPROMPT |
-            OFN_NOCHANGEDIR; // не мен€ть текущую директорию процесса
+            OFN_NOCHANGEDIR;
 
         if (GetSaveFileNameW(&ofn))
         {
             outPath = fileBuf;
             return true;
         }
-        return false; // cancel или ошибка
+        return false;
     }
 
     bool savePNG(std::wstring& outPath, const wchar_t* initialFileName)
@@ -63,7 +61,6 @@ namespace FileDialog
 
     bool saveJPG(std::wstring& outPath, const wchar_t* initialFileName)
     {
-        // defaultExt = "jpg" Ч WinAPI сам подставит, если нет расширени€
         return saveFile(outPath, FILTER_JPG, L"jpg", initialFileName);
     }
 

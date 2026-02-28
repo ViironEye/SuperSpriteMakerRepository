@@ -37,35 +37,27 @@ void BrushOverlay::drawBrushCircle(const Viewport& vp,
     pressure = clamp01(pressure);
 
     float R = (float)bs.radius;
-    if (bs.sizePressure)
-        R *= pressure;
+    if (bs.sizePressure) R *= pressure;
 
-    if (R <= 0.0f)
-        return;
+    if (R <= 0.0f) return;
 
-    // screen center (центр пикселя)
     float sx, sy;
     vp.canvasToScreen((float)cx + 0.5f, (float)cy + 0.5f, sx, sy);
 
     float rOuter = R * vp.zoom;
     if (rOuter < 1.0f) rOuter = 1.0f;
 
-    // hard edge radius
     float hard = clamp01(bs.hardness);
     float rHard = (R * hard) * vp.zoom;
 
-    // Clip внутри viewport
     const ImVec2 clipMin(vp.originX, vp.originY);
     const ImVec2 clipMax(vp.originX + vp.viewW, vp.originY + vp.viewH);
     DL()->PushClipRect(clipMin, clipMax, true);
 
-    // Внешний круг (radius)
     drawDualStrokeCircle(sx, sy, rOuter, segmentsForRadius(rOuter));
 
-    // Внутренний круг (hard edge), рисуем только если есть заметная разница
     if (hard > 0.0f && rHard >= 2.0f && (rOuter - rHard) >= 2.0f)
     {
-        // Сделаем hard edge чуть более “легким”, чтобы не спорил с внешним
         const ImU32 outer = IM_COL32(0, 0, 0, 140);
         const ImU32 inner = IM_COL32(255, 255, 255, 140);
         int seg = segmentsForRadius(rHard);

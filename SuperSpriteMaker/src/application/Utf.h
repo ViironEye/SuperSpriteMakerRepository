@@ -16,7 +16,6 @@ inline std::string wideToUtf8(const std::wstring& w)
         (char*)out.data(), size, nullptr, nullptr);
     return out;
 #else
-    // fallback: не-Windows
     return std::string(w.begin(), w.end());
 #endif
 }

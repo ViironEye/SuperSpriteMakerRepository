@@ -35,7 +35,6 @@ public:
 
     void setActiveFrameIndex(int i) { m_activeFrame = i; }
     int  activeFrameIndex() const { return m_activeFrame; }
-    //Frame* activeFrame() const { return m_sprite ? m_sprite->getFrame(m_activeFrame) : nullptr; }
 
     void setTool(Tool* tool) 
     { 

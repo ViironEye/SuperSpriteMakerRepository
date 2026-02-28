@@ -3,14 +3,16 @@
 #include <memory>
 #include "../model/Frame.h"
 
-class Command {
+class Command 
+{
 public:
 	virtual ~Command() = default;
 	virtual void undo() = 0;
 	virtual void redo() = 0;
 };
 
-struct PixelDiff {
+struct PixelDiff 
+{
 	int x;
 	int y;
 	PixelRGBA8 before;

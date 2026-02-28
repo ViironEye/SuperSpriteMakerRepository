@@ -145,7 +145,6 @@ void PixelBuffer::uploadToGLTexture(GLuint tex) const
     glBindTexture(GL_TEXTURE_2D, tex);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    // Предполагаем GL_RGBA/GL_UNSIGNED_BYTE
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height,
         GL_RGBA, GL_UNSIGNED_BYTE, m_pixels.data());
 

@@ -7,7 +7,7 @@
 class ShapeTool : public Tool
 {
 public:
-    ShapeTool(const ShapeSettings& s) : m_settings(s) {}
+    ShapeTool(const ShapeSettings& s) : m_settings(s) { }
 
     void setSettings(const ShapeSettings& s) { m_settings = s; }
     const ShapeSettings& settings() const { return m_settings; }

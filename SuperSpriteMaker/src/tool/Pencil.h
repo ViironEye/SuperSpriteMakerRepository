@@ -1,7 +1,8 @@
 #pragma once
 #include "Tool.h"
 
-class PencilTool : public Tool {
+class PencilTool : public Tool
+{
 public:
     explicit PencilTool(const PixelRGBA8& color);
 

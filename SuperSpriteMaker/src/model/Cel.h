@@ -5,9 +5,7 @@
 class Cel
 {
 public:
-    Cel(int width, int height, PixelFormat fmt, int durationMs, int x = 0, int y = 0)
-        : m_frame(width, height, fmt, durationMs), m_x(x), m_y(y) {
-    }
+    Cel(int width, int height, PixelFormat fmt, int durationMs, int x = 0, int y = 0) : m_frame(width, height, fmt, durationMs), m_x(x), m_y(y) { }
 
     Frame* frame() { return &m_frame; }
     const Frame* frame() const { return &m_frame; }

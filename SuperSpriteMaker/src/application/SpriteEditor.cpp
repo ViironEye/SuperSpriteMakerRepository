@@ -13,7 +13,6 @@ static inline uint8_t mul255(uint8_t a, uint8_t b)
 
 static void blendOver(PixelBuffer& dst, const PixelBuffer& src, int dx, int dy, uint8_t layerOpacity)
 {
-    // предполагаем RGBA8
     for (int y = 0; y < src.height(); ++y)
     {
         int ty = dy + y;
@@ -27,20 +26,17 @@ static void blendOver(PixelBuffer& dst, const PixelBuffer& src, int dx, int dy, 
             PixelRGBA8 s = src.getPixel(x, y);
             if (s.a == 0) continue;
 
-            // умножаем альфу источника на opacity слоя
             uint8_t Sa = mul255(s.a, layerOpacity);
             if (Sa == 0) continue;
 
             PixelRGBA8 d = dst.getPixel(tx, ty);
 
-            // out = s over d
-            // a_out = Sa + Da*(1-Sa)
-            // rgb_out = (s.rgb*Sa + d.rgb*Da*(1-Sa)) / a_out
             float sa = Sa / 255.0f;
             float da = d.a / 255.0f;
-
             float outA = sa + da * (1.0f - sa);
-            if (outA <= 0.0f) {
+
+            if (outA <= 0.0f) 
+            {
                 dst.setPixel(tx, ty, PixelRGBA8(0, 0, 0, 0));
                 continue;
             }
@@ -135,14 +131,12 @@ void SpriteEditor::pointerDown(int x, int y, float pressure, const Modifiers& mo
         Frame* frame = activeCelFrame();
         if (!frame) return;
 
-        // Eyedropper: один клик
         if (dynamic_cast<EyedropperTool*>(m_tool))
         {
             m_tool->apply(frame, nullptr, x, y, pressure);
             return;
         }
 
-        // Fill: как раньше
         if (auto* fill = dynamic_cast<FillTool*>(m_tool))
         {
             auto cmd = std::make_unique<StrokeCommand>(frame);
@@ -185,7 +179,10 @@ void SpriteEditor::pointerMove(int x, int y, float pressure, const Modifiers& mo
 
 void SpriteEditor::pointerUp(int x, int y, float pressure, const Modifiers& mods)
 {
-    (void)x; (void)y; (void)pressure; (void)mods;
+    (void)x; 
+    (void)y; 
+    (void)pressure; 
+    (void)mods;
 
     if (m_mode == EditorMode::Draw)
     {
@@ -221,12 +218,10 @@ void SpriteEditor::keyEsc()
 
 void SpriteEditor::keyEnter()
 {
-    if (!m_moveSession.active())
-        return;
+    if (!m_moveSession.active()) return;
 
     auto cmd = m_moveSession.commit();
-    if (cmd)
-        m_undo.push(std::move(cmd));
+    if (cmd) m_undo.push(std::move(cmd));
 }
 
 const PixelBuffer& SpriteEditor::compositeFrame()
@@ -278,8 +273,6 @@ const PixelBuffer& SpriteEditor::compositePixels()
         Cel* c = L->getCel(m_activeFrame);
         if (!c) continue;
 
-        // Normal blend + layer opacity:
-        // нужно написать blendOver() (ниже)
         blendOver(m_composite, c->pixels(), c->x(), c->y(), L->opacity());
     }
 
@@ -291,10 +284,8 @@ void SpriteEditor::clampActiveIndices()
     if (!m_sprite) return;
 
     if (m_activeFrame < 0) m_activeFrame = 0;
-    if (m_activeFrame >= m_sprite->frameCount())
-        m_activeFrame = std::max(0, m_sprite->frameCount() - 1);
+    if (m_activeFrame >= m_sprite->frameCount()) m_activeFrame = std::max(0, m_sprite->frameCount() - 1);
 
     if (m_activeLayer < 0) m_activeLayer = 0;
-    if (m_activeLayer >= m_sprite->layerCount())
-        m_activeLayer = std::max(0, m_sprite->layerCount() - 1);
+    if (m_activeLayer >= m_sprite->layerCount()) m_activeLayer = std::max(0, m_sprite->layerCount() - 1);
 }

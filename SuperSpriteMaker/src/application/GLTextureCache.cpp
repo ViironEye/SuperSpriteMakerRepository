@@ -1,5 +1,5 @@
 #include "GLTextureCache.h"
-#include "../model/PixelBuffer.h" // твой класс
+#include "../model/PixelBuffer.h"
 
 GLTextureCache::~GLTextureCache()
 {
@@ -8,13 +8,11 @@ GLTextureCache::~GLTextureCache()
 
 void GLTextureCache::create()
 {
-    if (m_tex != 0)
-        return;
+    if (m_tex != 0) return;
 
     glGenTextures(1, &m_tex);
     glBindTexture(GL_TEXTURE_2D, m_tex);
 
-    // Пиксель-арт дефолты
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -36,11 +34,9 @@ void GLTextureCache::destroy()
 
 void GLTextureCache::allocate(int w, int h)
 {
-    // Выделяем/перевыделяем память текстуры под RGBA8
     glBindTexture(GL_TEXTURE_2D, m_tex);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    // ВАЖНО: выделяем, но не загружаем данные (nullptr)
     glTexImage2D(GL_TEXTURE_2D,
         0,
         GL_RGBA8,
@@ -69,14 +65,8 @@ void GLTextureCache::ensure(int width, int height)
 
 void GLTextureCache::upload(const PixelBuffer& pb)
 {
-    // Пока предполагаем, что pb в RGBA8 (как твой Canvas/preview).
-    // Если позже добавишь другие форматы, здесь будет конвертация в RGBA8 временным буфером.
-
     ensure(pb.width(), pb.height());
-    if (m_tex == 0)
-        return;
+    if (m_tex == 0) return;
 
-    // У тебя уже есть готовая функция — используем её.
-    // Она должна делать glBindTexture + glTexSubImage2D (или glTexImage2D).
     pb.uploadToGLTexture(m_tex);
 }

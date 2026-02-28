@@ -27,7 +27,6 @@ static PixelRGBA8 sampleNearest(const std::vector<uint8_t>& src, int sw, int sh,
 
 static PixelRGBA8 sampleBilinear(const std::vector<uint8_t>& src, int sw, int sh, float fx, float fy)
 {
-    // clamp to edges
     fx = std::max(0.0f, std::min(fx, (float)(sw - 1)));
     fy = std::max(0.0f, std::min(fy, (float)(sh - 1)));
 
@@ -78,22 +77,18 @@ namespace ImageImport
 
         const int cw = spr->width();
         const int ch = spr->height();
-        if (cw <= 0 || ch <= 0 || sw <= 0 || sh <= 0)
-            return false;
+        if (cw <= 0 || ch <= 0 || sw <= 0 || sh <= 0) return false;
 
-        // ---- preserve aspect ratio: fit-inside ----
         float sx = (float)cw / (float)sw;
         float sy = (float)ch / (float)sh;
         float s = std::min(sx, sy);
 
-        // „тобы не получить 0 при очень маленьком canvas:
         int dw = std::max(1, (int)std::lround(sw * s));
         int dh = std::max(1, (int)std::lround(sh * s));
 
         int ox = (cw - dw) / 2;
         int oy = (ch - dh) / 2;
 
-        // ---- create new layer ----
         int layerNum = spr->layerCount() + 1;
         Layer* L = spr->createLayer("Imported " + std::to_string(layerNum));
         if (!L) return false;
@@ -102,15 +97,11 @@ namespace ImageImport
 
         const int fi = editor.activeFrameIndex();
         Cel* cel = L->getCel(fi);
-        if (!cel || !cel->frame())
-            return false;
+        if (!cel || !cel->frame()) return false;
 
         PixelBuffer& dst = cel->pixels();
         dst.clear(PixelRGBA8(0, 0, 0, 0));
 
-        // ---- resample into dst with offset ----
-        // map dst pixel -> src coordinate
-        // dst rect: [ox..ox+dw-1], [oy..oy+dh-1]
         for (int y = 0; y < dh; ++y)
         {
             for (int x = 0; x < dw; ++x)

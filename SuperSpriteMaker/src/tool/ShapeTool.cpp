@@ -34,8 +34,8 @@ void ShapeTool::rasterize(Frame* frame, StrokeCommand* cmd)
     switch (m_settings.mode)
     {
     case ShapeMode::Rectangle: drawRect(frame, cmd); break;
-    case ShapeMode::Ellipse:    drawEllipse(frame, cmd); break;
-    case ShapeMode::Line:      drawLine(frame, cmd); break;
+    case ShapeMode::Ellipse: drawEllipse(frame, cmd); break;
+    case ShapeMode::Line: drawLine(frame, cmd); break;
     }
 }
 
@@ -152,16 +152,13 @@ void ShapeTool::drawEllipse(Frame* frame, StrokeCommand* cmd)
     int a = (x1 - x0) / 2;
     int b = (y1 - y0) / 2;
 
-    if (a <= 0 && b <= 0)
-        return;
+    if (a <= 0 && b <= 0) return;
 
     auto plot = [&](int px, int py)
         {
             if (!pb.inBounds(px, py)) return;
             PixelRGBA8 before = pb.getPixel(px, py);
-            if (before.r == m_color.r && before.g == m_color.g &&
-                before.b == m_color.b && before.a == m_color.a)
-                return;
+            if (before.r == m_color.r && before.g == m_color.g && before.b == m_color.b && before.a == m_color.a) return;
             pb.setPixel(px, py, m_color);
             cmd->recordPixel(px, py, before, m_color);
         };
@@ -172,23 +169,25 @@ void ShapeTool::drawEllipse(Frame* frame, StrokeCommand* cmd)
             if (xL > xR) std::swap(xL, xR);
             xL = std::max(xL, 0);
             xR = std::min(xR, pb.width() - 1);
-            for (int x = xL; x <= xR; ++x)
-                plot(x, y);
+            for (int x = xL; x <= xR; ++x) plot(x, y);
         };
 
     int thickness = std::max(1, m_settings.thickness);
 
     auto drawOneEllipseOutline = [&](int ra, int rb)
         {
-            if (ra <= 0 && rb <= 0) {
+            if (ra <= 0 && rb <= 0)
+            {
                 plot(cx, cy);
                 return;
             }
-            if (ra <= 0) {
+            if (ra <= 0)
+            {
                 for (int y = -rb; y <= rb; ++y) plot(cx, cy + y);
                 return;
             }
-            if (rb <= 0) {
+            if (rb <= 0)
+            {
                 for (int x = -ra; x <= ra; ++x) plot(cx + x, cy);
                 return;
             }
@@ -211,12 +210,14 @@ void ShapeTool::drawEllipse(Frame* frame, StrokeCommand* cmd)
                 plot(cx + (int)x, cy - (int)y);
                 plot(cx - (int)x, cy - (int)y);
 
-                if (d1 < 0) {
+                if (d1 < 0)
+                {
                     x++;
                     dx += 2LL * b2;
                     d1 += dx + b2;
                 }
-                else {
+                else
+                {
                     x++;
                     y--;
                     dx += 2LL * b2;
@@ -236,12 +237,14 @@ void ShapeTool::drawEllipse(Frame* frame, StrokeCommand* cmd)
                 plot(cx + (int)x, cy - (int)y);
                 plot(cx - (int)x, cy - (int)y);
 
-                if (D2 > 0) {
+                if (D2 > 0)
+                {
                     y--;
                     dy -= 2LL * a2;
                     D2 += 4LL * a2 - dy;
                 }
-                else {
+                else
+                {
                     y--;
                     x++;
                     dx += 2LL * b2;
@@ -273,12 +276,14 @@ void ShapeTool::drawEllipse(Frame* frame, StrokeCommand* cmd)
                 hline(cx - (int)x, cx + (int)x, cy + (int)y);
                 hline(cx - (int)x, cx + (int)x, cy - (int)y);
 
-                if (d1 < 0) {
+                if (d1 < 0)
+                {
                     x++;
                     dx += 2LL * b2;
                     d1 += dx + b2;
                 }
-                else {
+                else
+                {
                     x++;
                     y--;
                     dx += 2LL * b2;
@@ -295,12 +300,14 @@ void ShapeTool::drawEllipse(Frame* frame, StrokeCommand* cmd)
                 hline(cx - (int)x, cx + (int)x, cy + (int)y);
                 hline(cx - (int)x, cx + (int)x, cy - (int)y);
 
-                if (D2 > 0) {
+                if (D2 > 0)
+                {
                     y--;
                     dy -= 2LL * a2;
                     D2 += 4LL * a2 - dy;
                 }
-                else {
+                else
+                {
                     y--;
                     x++;
                     dx += 2LL * b2;

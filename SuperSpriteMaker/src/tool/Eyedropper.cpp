@@ -11,14 +11,12 @@ void EyedropperTool::apply(Frame* frame, StrokeCommand* /*cmd*/, int x, int y, f
 
     if (m_settings.sampleMerged)
     {
-        // берём то, что видно (композит)
         const PixelBuffer& pb = m_editor->compositePixels();
         if (!pb.inBounds(x, y)) return;
         c = pb.getPixel(x, y);
     }
     else
     {
-        // берём только из активного слоя (frame = activeCelFrame)
         if (!frame) return;
         PixelBuffer& pb = frame->pixels();
         if (!pb.inBounds(x, y)) return;
@@ -26,7 +24,5 @@ void EyedropperTool::apply(Frame* frame, StrokeCommand* /*cmd*/, int x, int y, f
     }
 
     m_last = c;
-
-    // сообщаем редактору о новом цвете
     m_editor->setPrimaryColor(c);
 }

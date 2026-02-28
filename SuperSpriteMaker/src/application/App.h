@@ -1,15 +1,11 @@
 #pragma once
-
 #include <memory>
 #include <string>
-
 #include "EditorUI.h"
 
 struct GLFWwindow;
-
 class Sprite;
 class SpriteEditor;
-//class EditorUI;
 
 class App
 {
@@ -23,8 +19,6 @@ public:
     bool init(int width = 1280, int height = 720, const char* title = "SuperSpriteMaker");
     int  run();
     void shutdown();
-
-    //void update();
     void render();
 
     GLFWwindow* window() const { return m_window; }

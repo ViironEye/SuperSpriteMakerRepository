@@ -51,7 +51,7 @@ void EditorUI::draw()
                 if (FileDialog::savePNG(wpath))
                 {
                     const PixelBuffer& pb = m_editor->compositePixels();
-                    ImageWriter::savePNG(wideToUtf8(wpath), pb, /*flipY*/true);
+                    ImageWriter::savePNG(wideToUtf8(wpath), pb, true);
                 }
             }
 
@@ -61,7 +61,7 @@ void EditorUI::draw()
                 if (FileDialog::saveJPG(wpath))
                 {
                     const PixelBuffer& pb = m_editor->compositePixels();
-                    ImageWriter::saveJPG(wideToUtf8(wpath), pb, /*quality*/90, /*flipY*/true);
+                    ImageWriter::saveJPG(wideToUtf8(wpath), pb, 90, true);
                 }
             }
 
@@ -72,7 +72,6 @@ void EditorUI::draw()
                 {
                     std::string path = wideToUtf8(wpath);
 
-                    // nearest=true (pixel art)
                     ImageImport::importAsNewLayer(*m_editor, path, true);
                 }
             }
@@ -89,7 +88,6 @@ void EditorUI::draw()
     {
         ImGui::InputText("Path", s_path, IM_ARRAYSIZE(s_path));
 
-        // проста€ логика выбора формата по расширению
         bool isPNG = false, isJPG = false;
         {
             std::string p = s_path;
@@ -116,7 +114,6 @@ void EditorUI::draw()
             else if (isJPG)
                 ok = ImageWriter::saveJPG(s_path, pb, jpgQuality, flipY);
 
-            // ћожно вывести статус
             if (!ok)
                 ImGui::OpenPopup("Export Failed");
             else
@@ -142,6 +139,29 @@ void EditorUI::draw()
 
         ImGui::EndPopup();
     }
+
+    ImGui::Separator();
+    if (ImGui::Button("Undo")) m_editor->undo().undo();
+    ImGui::SameLine();
+    if (ImGui::Button("Redo")) m_editor->undo().redo();
+
+#pragma region undoAndRedoHotkeys
+    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
+    {
+        m_editor->undo().undo();
+    }
+
+    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y))
+    {
+        m_editor->undo().redo();
+    }
+
+    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z))
+    {
+        m_editor->undo().redo();
+    }
+#pragma endregion
+
 
     if (!m_atlasReady)
         m_atlasReady = m_toolAtlas.create();
@@ -182,14 +202,12 @@ void EditorUI::draw()
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("%s", tooltip);
 
-            // рамка активного
             if (selected) {
                 ImVec2 a = ImGui::GetItemRectMin();
                 ImVec2 b = ImGui::GetItemRectMax();
                 ImGui::GetWindowDrawList()->AddRect(a, b, IM_COL32(255, 255, 255, 200), 0.0f, 0, 2.0f);
             }
 
-            // ѕравый клик -> открыть параметры (если у инструмента есть)
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
             {
                 if (idx == 1) m_paramsPanel = ToolParamsPanel::Ink;
@@ -199,7 +217,6 @@ void EditorUI::draw()
                 if (idx == 7) m_paramsPanel = ToolParamsPanel::Fill;
             }
 
-            // Ћевый клик: выбрать инструмент; если уже выбран Ч открыть параметры
             if (clicked)
             {
                 if (!selected)
@@ -208,7 +225,6 @@ void EditorUI::draw()
                 }
                 else
                 {
-                    // повторный клик по выбранному открывает параметры
                     if (idx == 1) m_paramsPanel = ToolParamsPanel::Ink;
                     if (idx == 2) m_paramsPanel = ToolParamsPanel::Brush;
                     if (idx == 3) m_paramsPanel = ToolParamsPanel::Eraser;
@@ -221,7 +237,6 @@ void EditorUI::draw()
             return clicked;
         };
 
-    //Tools
     ImGui::BeginChild("ToolsArea", ImVec2(160.f, 140.f), true, ImGuiWindowFlags_NoScrollbar);
     iconBtn(0, "Pencil"); ImGui::SameLine(); iconBtn(1, "Ink"); ImGui::SameLine(); iconBtn(2, "Brush");
     iconBtn(3, "Eraser"); ImGui::SameLine(); iconBtn(4, "Select"); ImGui::SameLine(); iconBtn(5, "Move");
@@ -350,7 +365,6 @@ void EditorUI::draw()
     }
     ImGui::EndChild();
 
-    //Colors
     PixelRGBA8 pc = m_editor->primaryColor();
     m_color[0] = pc.r / 255.0f;
     m_color[1] = pc.g / 255.0f;
@@ -406,7 +420,6 @@ void EditorUI::draw()
         ImGui::Checkbox("Size Pressure", &s.sizePressure);
         ImGui::Checkbox("Opacity Pressure", &s.opacityPressure);
 
-        // нормализаци€
         if (s.radius < 1.0f) s.radius = 1.0f;
         if (s.spacing < 0.01f) s.spacing = 0.01f;
         if (s.hardness < 0.0f) s.hardness = 0.0f;
@@ -435,10 +448,6 @@ void EditorUI::draw()
         const char* modes[] = { "Rectangle", "Ellipse", "Line" };
         ImGui::Text("Mode: %s", modes[mode]);
 
-        if (ImGui::Button("Change Mode..."))
-            ImGui::OpenPopup("ShapeModePopup");
-
-        // можно продублировать быстрый выбор пр€мо здесь:
         if (ImGui::RadioButton("Rectangle##shape", mode == 0)) mode = 0;
         if (ImGui::RadioButton("Ellipse##shape", mode == 1)) mode = 1;
         if (ImGui::RadioButton("Line##shape", mode == 2)) mode = 2;
@@ -453,7 +462,6 @@ void EditorUI::draw()
         m_shapeSettings.mode = (ShapeMode)mode;
         m_shapeTool.setSettings(m_shapeSettings);
 
-        // сам popup (общий) может жить тут же Ч он глобален в рамках окна
         if (ImGui::BeginPopup("ShapeModePopup"))
         {
             int pmode = (int)m_shapeSettings.mode;
@@ -503,15 +511,8 @@ void EditorUI::draw()
     }
 
     ImGui::EndChild();
-    //
-    ImGui::Separator();
-    if (ImGui::Button("Undo")) m_editor->undo().undo();
-    ImGui::SameLine();
-    if (ImGui::Button("Redo")) m_editor->undo().redo();
 
-    // ---------- Viewport ----------
-    ImGuiWindowFlags canvasFlags =
-        ImGuiWindowFlags_NoScrollbar;// | ImGuiWindowFlags_NoScrollWithMouse;
+    ImGuiWindowFlags canvasFlags = ImGuiWindowFlags_NoScrollWithMouse;
 
     ImVec2 canvasSize = ImGui::GetContentRegionAvail();
     if (canvasSize.x < 1) canvasSize.x = 1;
@@ -566,6 +567,7 @@ void EditorUI::draw()
             ImVec2 d(io.MousePos.x - panStart.x, io.MousePos.y - panStart.y);
             m_vp.panX = panX0 + d.x;
             m_vp.panY = panY0 + d.y;
+            m_vp.clampPan();
         }
         else {
             panning = false;
@@ -593,8 +595,20 @@ void EditorUI::draw()
         if (ImGui::IsKeyPressed(ImGuiKey_Escape)) m_editor->keyEsc();
         if (ImGui::IsKeyPressed(ImGuiKey_Enter))  m_editor->keyEnter();
     }
+    if (hovered)
+    {
+        if (ImGui::IsKeyPressed(ImGuiKey_F))
+            m_vp.fitToView();
+
+        if (ImGui::IsKeyPressed(ImGuiKey_1))
+        {
+            m_vp.zoom = 1.0f;
+            m_vp.clampPan();
+        }
+    }
 
     const PixelBuffer& pb = m_editor->compositePixels();
+    m_vp.setCanvasSize(pb.width(), pb.height());
 
     if (&pb != nullptr)
     {
@@ -606,10 +620,9 @@ void EditorUI::draw()
 
         m_presenter.present(pb, m_vp, m_presentOpt);
 
-        // preview раст€гивани€ пр€моугольного выделени€
         if (m_editor->mode() == EditorMode::SelectRect)
         {
-            const RectSelectTool& rs = m_editor->rectSelectTool(); // нужен геттер (см. ниже)
+            const RectSelectTool& rs = m_editor->rectSelectTool();
             if (rs.active())
             {
                 SelectionOverlay::drawRubberBand(
@@ -621,7 +634,6 @@ void EditorUI::draw()
             }
         }
 
-
         if (hovered)
         {
             int cx, cy;
@@ -632,7 +644,6 @@ void EditorUI::draw()
                     BrushOverlay::drawBrushCircle(m_vp, cx, cy, brush->settings(), 1.0f, true);
             }
         }
-
         Sprite* spr = m_editor->sprite();
         if (spr)
         {
@@ -644,7 +655,6 @@ void EditorUI::draw()
             }
 
             ImGui::Separator();
-
             for (int i = spr->layerCount() - 1; i >= 0; --i)
             {
                 Layer* L = spr->getLayer(i);

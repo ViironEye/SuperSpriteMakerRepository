@@ -16,11 +16,7 @@ void PencilTool::apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pre
 
     PixelRGBA8 after = m_color;
 
-    if (before.r == after.r &&
-        before.g == after.g &&
-        before.b == after.b &&
-        before.a == after.a)
-        return;
+    if (before.r == after.r && before.g == after.g && before.b == after.b && before.a == after.a) return;
 
     cmd->recordPixel(x, y, before, after);
     pb.setPixel(x, y, after);

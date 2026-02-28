@@ -13,6 +13,7 @@ static void makeFlippedCopyRGBA(const PixelBuffer& pb, std::vector<uint8_t>& out
     const int w = pb.width();
     const int h = pb.height();
     const int bpp = 4;
+
     outRGBA.resize(size_t(w) * size_t(h) * bpp);
 
     const uint8_t* src = pb.data();
@@ -41,8 +42,6 @@ static void makeRGBFromRGBA_CompositeOnWhite(const PixelBuffer& pb, std::vector<
         {
             PixelRGBA8 s = pb.getPixel(x, sy);
 
-            // композит на белый фон: out = s over white
-            // white = 255
             float a = s.a / 255.0f;
 
             uint8_t r = (uint8_t)((s.r * a) + (255.0f * (1.0f - a)));
@@ -61,15 +60,13 @@ namespace ImageWriter
 {
     bool savePNG(const std::string& path, const PixelBuffer& pb, bool flipY)
     {
-        if (pb.format() != PixelFormat::RGBA8)
-            return false;
+        if (pb.format() != PixelFormat::RGBA8) return false;
 
         const int w = pb.width();
         const int h = pb.height();
 
         if (!flipY)
         {
-            // pb.data() уже с нужным направлением
             return stbi_write_png(path.c_str(), w, h, 4, pb.data(), pb.stride()) != 0;
         }
         else
@@ -82,8 +79,7 @@ namespace ImageWriter
 
     bool saveJPG(const std::string& path, const PixelBuffer& pb, int quality, bool flipY)
     {
-        if (pb.format() != PixelFormat::RGBA8)
-            return false;
+        if (pb.format() != PixelFormat::RGBA8) return false;
 
         if (quality < 1) quality = 1;
         if (quality > 100) quality = 100;

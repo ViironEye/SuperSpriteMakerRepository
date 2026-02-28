@@ -8,19 +8,13 @@
 class InkTool : public Tool
 {
 public:
-    explicit InkTool(const PixelRGBA8& color)
-        : m_color(color)
-    {
-    }
+    explicit InkTool(const PixelRGBA8& color) : m_color(color) { }
 
     void setColor(const PixelRGBA8& c) { m_color = c; }
     InkSettings& settings() { return m_settings; }
     const InkSettings& settings() const { return m_settings; }
 
-    void apply(Frame* frame,
-        StrokeCommand* cmd,
-        int x, int y,
-        float pressure) override;
+    void apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure) override;
 
 private:
     PixelRGBA8 m_color;
@@ -33,6 +27,5 @@ private:
         return (uint8_t)v;
     }
 
-    // src-over композитинг одного пикселя (dst = src over dst)
     static PixelRGBA8 blendSrcOver(const PixelRGBA8& dst, const PixelRGBA8& src);
 };

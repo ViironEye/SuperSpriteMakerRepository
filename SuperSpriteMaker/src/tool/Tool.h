@@ -7,6 +7,5 @@ class Tool {
 public:
 	virtual ~Tool() = default;
 
-	//virtual void apply(Frame* frame, StrokeCommand* cmd, BrushRuntimeState& state, int x, int y, float pressure) = 0;
 	virtual void apply(Frame* frame, StrokeCommand* cmd, int x, int y, float pressure) = 0;
 };

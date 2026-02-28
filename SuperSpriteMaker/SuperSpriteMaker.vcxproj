@@ -227,6 +227,17 @@
     <ClInclude Include="src\tool\Tool.h" />
     <ClInclude Include="src\tool\UndoStack.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\icons\brush.png" />
+    <Image Include="src\icons\eraser.png" />
+    <Image Include="src\icons\eyedropper.png" />
+    <Image Include="src\icons\fill.png" />
+    <Image Include="src\icons\ink.png" />
+    <Image Include="src\icons\move.png" />
+    <Image Include="src\icons\pencil.png" />
+    <Image Include="src\icons\select.png" />
+    <Image Include="src\icons\shape.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

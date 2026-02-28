@@ -7,9 +7,7 @@
 class Stroke
 {
     public:
-        Stroke(Tool* tool, Frame* frame, StrokeCommand* cmd)
-            : m_tool(tool), m_frame(frame), m_cmd(cmd) {
-        }
+        Stroke(Tool* tool, Frame* frame, StrokeCommand* cmd) : m_tool(tool), m_frame(frame), m_cmd(cmd) { }
 
         void begin(int x, int y, float pressure)
         {

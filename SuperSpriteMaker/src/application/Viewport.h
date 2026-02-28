@@ -1,26 +1,29 @@
 #pragma once
-#pragma once
-#include <cmath>
 
 struct Viewport
 {
-    // экранные координаты (в пикселях окна) -> canvas координаты (в пикселях спрайта)
-    float panX = 0.0f;   // сдвиг в экране
+    float panX = 0.0f;
     float panY = 0.0f;
-    float zoom = 16.0f;  // сколько экранных пикселей на 1 canvas пиксель (16x удобно)
+    float zoom = 16.0f;
 
-    // Позиция области рисования в окне UI (левый верх) и её размер
     float originX = 0.0f;
     float originY = 0.0f;
-    float viewW = 0.0f;
-    float viewH = 0.0f;
+    float viewW = 1.0f;
+    float viewH = 1.0f;
 
-    void setViewRect(float x, float y, float w, float h);
+    float zoomMin = 0.25f;
+    float zoomMax = 128.0f;
 
-    // Screen -> Canvas (int pixels)
+    int canvasW = 0;
+    int canvasH = 0;
+
     bool screenToCanvas(float sx, float sy, int& outX, int& outY) const;
+    void setViewRect(float x, float y, float w, float h) { originX = x; originY = y; viewW = w; viewH = h; }
 
-    // Canvas -> Screen (float)
+    void setCanvasSize(int w, int h) { canvasW = w; canvasH = h; }
+
+    void fitToView();
+    void clampPan();
     void canvasToScreen(float cx, float cy, float& outSX, float& outSY) const;
 
     void zoomAt(float factor, float screenX, float screenY);

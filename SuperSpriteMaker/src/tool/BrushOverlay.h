@@ -4,9 +4,5 @@
 
 struct BrushOverlay
 {
-    static void drawBrushCircle(const Viewport& vp,
-        int cx, int cy,
-        const BrushSettings& bs,
-        float pressure,
-        bool drawCenter = true);
+    static void drawBrushCircle(const Viewport& vp, int cx, int cy, const BrushSettings& bs, float pressure, bool drawCenter = true);
 };

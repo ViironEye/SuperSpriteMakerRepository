@@ -285,4 +285,33 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\icons\brush.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\eraser.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\eyedropper.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\fill.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\ink.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\move.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\pencil.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\select.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="src\icons\shape.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
